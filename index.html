@@ -2,859 +2,164 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<title>Hierarquia PM - Administração</title>
+<title>HIERARQUIA DE ROTA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="description" content="Sistema de gerenciamento de hierarquia da Polícia Militar" />
 <style>
-body {
-    background: #0b0f14;
-    color: #e5e7eb;
-    font-family: Arial, sans-serif;
-    margin: 0;
-}
+/* ================= VISUAL PRETO E BRANCO ================= */
+body{background:#000;color:#f5f5f5;font-family:Arial;margin:0}
+header{background:#000;border-bottom:1px solid #333;padding:15px;text-align:center;position:relative}
+h1{margin:0;font-size:1.6rem}
+.card{background:#0a0a0a;border:1px solid #333;border-radius:10px;padding:20px;margin-bottom:20px}
+main{max-width:1500px;margin:auto;padding:20px}
 
-header {
-    padding: 15px;
-    background: #020617;
-    text-align: center;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+button{padding:10px 16px;border-radius:6px;border:none;font-weight:bold;cursor:pointer}
+.btn{background:#fff;color:#000}
+.btn-danger{background:#444;color:#fff}
+.btn-success{background:#666;color:#fff}
 
-h1 {
-    margin: 0;
-    font-size: 1.5rem;
-}
+input,select{background:#0f0f0f;color:#fff;border:1px solid #444;padding:10px;border-radius:6px;width:100%}
 
-.login-area {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{padding:10px;border-bottom:1px solid #333;text-align:left;font-size:14px}
+th{background:#111}
+tr:hover{background:#1a1a1a}
 
-.login-btn {
-    background: #2563eb;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-}
+.badge{padding:6px 12px;border-radius:999px;font-weight:bold;border:1px solid #000}
+.superior,.intermediario,.subalterno,.especial,.graduado,.praca{background:#fff;color:#000}
 
-.login-btn:hover {
-    background: #1d4ed8;
-}
+.hidden{display:none}
 
-.logout-btn {
-    background: #dc2626;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-}
+/* STATUS */
+.ativo{color:#22c55e;font-weight:bold}
+.ausente{color:#facc15;font-weight:bold}
+.inativo{color:#ef4444;font-weight:bold}
 
-.logout-btn:hover {
-    background: #b91c1c;
-}
-
-main {
-    padding: 20px;
-    max-width: 1500px;
-    margin: auto;
-}
-
-.card {
-    background: #020617;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #1e293b;
-    text-align: left;
-    font-size: 14px;
-}
-
-th {
-    background: #0f172a;
-    color: #93c5fd;
-    font-weight: bold;
-    position: sticky;
-    top: 0;
-}
-
-tr:hover {
-    background: #1e293b;
-}
-
-input, select {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px solid #334155;
-    width: 100%;
-    margin-bottom: 10px;
-    background: #0f172a;
-    color: #e5e7eb;
-    box-sizing: border-box;
-}
-
-input:focus, select:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
-}
-
-button {
-    padding: 10px 16px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-}
-
-.btn {
-    background: #2563eb;
-    color: #fff;
-}
-
-.btn:hover {
-    background: #1d4ed8;
-}
-
-.btn-danger {
-    background: #dc2626;
-    color: #fff;
-}
-
-.btn-danger:hover {
-    background: #b91c1c;
-}
-
-.hidden {
-    display: none;
-}
-
-/* CORES POR CATEGORIA */
-.superior {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    color: #020617;
-}
-
-.intermediario {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-    color: #020617;
-}
-
-.subalterno {
-    background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-    color: #020617;
-}
-
-.especial {
-    background: linear-gradient(135deg, #7dd3fc 0%, #0ea5e9 100%);
-    color: #020617;
-}
-
-.graduado {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: #fff;
-}
-
-.praca {
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    color: #020617;
-}
-
-.badge {
-    padding: 6px 12px;
-    border-radius: 999px;
-    font-weight: bold;
-    display: inline-block;
-    min-width: 120px;
-    text-align: center;
-    font-size: 0.9em;
-}
-
-.ativo {
-    color: #22c55e;
-    font-weight: bold;
-}
-
-.ausente {
-    color: #facc15;
-    font-weight: bold;
-}
-
-.inativo {
-    color: #ef4444;
-    font-weight: bold;
-}
-
-/* Modal de Login */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-}
-
-.modal-content {
-    background: #020617;
-    margin: 15% auto;
-    padding: 25px;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 400px;
-    border: 1px solid #334155;
-}
-
-.modal h2 {
-    margin-top: 0;
-    color: #93c5fd;
-}
-
-.close {
-    color: #94a3b8;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: #e5e7eb;
-}
-
-/* Form grid */
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    color: #cbd5e1;
-    font-size: 0.9em;
-}
-
-/* Responsividade */
-@media (max-width: 768px) {
-    header {
-        flex-direction: column;
-        padding: 10px;
-        text-align: center;
-    }
-    
-    .login-area {
-        position: static;
-        transform: none;
-        margin-top: 10px;
-    }
-    
-    table {
-        font-size: 12px;
-    }
-    
-    th, td {
-        padding: 8px 10px;
-    }
-    
-    .badge {
-        min-width: 90px;
-        font-size: 0.8em;
-    }
-}
-
-/* Status indicator */
-.status-indicator {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.status-ativo {
-    background: #22c55e;
-}
-
-.status-ausente {
-    background: #facc15;
-}
-
-.status-inativo {
-    background: #ef4444;
-}
-
-/* Highlight para novo registro */
-.novo-registro {
-    animation: highlight 2s ease-in-out;
-    background: rgba(34, 197, 94, 0.1) !important;
-}
-
-@keyframes highlight {
-    0% { background: rgba(34, 197, 94, 0.3); }
-    100% { background: rgba(34, 197, 94, 0.1); }
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #94a3b8;
-    font-style: italic;
-}
+.status-indicator{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.status-ativo{background:#22c55e}
+.status-ausente{background:#facc15}
+.status-inativo{background:#ef4444}
 </style>
 </head>
 <body>
 <header>
-    <h1>Hierarquia Organizacional PM</h1>
-    <div class="login-area">
-        <button id="loginBtn" class="login-btn">Login Admin</button>
-        <button id="logoutBtn" class="logout-btn hidden">Sair</button>
-    </div>
+<h1>🔒 HIERARQUIA DE ROTA</h1>
+<button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
+<button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
 
 <main>
-<!-- Modal de Login -->
-<div id="loginModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Login Administrador</h2>
-        <input type="password" id="senha" placeholder="Digite a senha de administrador" autocomplete="off" />
-        <button class="btn" id="btnEntrar">Entrar</button>
-        <p style="margin-top: 15px; font-size: 12px; color: #94a3b8;">Senha padrão: ROTA123</p>
-    </div>
-</div>
-
-<!-- Painel Administrativo -->
-<div id="adminPanel" class="card hidden">
-    <h2>Painel Administrativo</h2>
-    <div class="form-grid">
-        <div class="form-group">
-            <label>Nome Completo *</label>
-            <input id="nome" placeholder="Nome do integrante" autocomplete="off" />
-        </div>
-        <div class="form-group">
-            <label>Patente *</label>
-            <select id="patente"></select>
-        </div>
-        <div class="form-group">
-            <label>CPF</label>
-            <input id="cpf" placeholder="000.000.000-00" autocomplete="off" />
-        </div>
-        <div class="form-group">
-            <label>Data de Entrada</label>
-            <input type="date" id="entrada" />
-        </div>
-        <div class="form-group">
-            <label>Última Promoção</label>
-            <input type="date" id="promocao" />
-        </div>
-        <div class="form-group">
-            <label>Serial</label>
-            <input id="serial" placeholder="Número de série" autocomplete="off" />
-        </div>
-        <div class="form-group">
-            <label>Função</label>
-            <input id="funcao" placeholder="Cargo/Função" autocomplete="off" />
-        </div>
-        <div class="form-group">
-            <label>Situação</label>
-            <select id="situacao">
-                <option value="ativo">Ativo</option>
-                <option value="ausente">Ausente</option>
-                <option value="inativo">Inativo</option>
-            </select>
-        </div>
-    </div>
-    <div style="display: flex; gap: 10px; margin-top: 15px;">
-        <button class="btn" id="btnAdicionar">Adicionar Integrante</button>
-        <button class="btn-danger" id="btnLimpar">Limpar Campos</button>
-        <button class="btn" id="btnExportar" style="background: #10b981;">Exportar Dados</button>
-    </div>
-    <div style="margin-top: 15px; font-size: 12px; color: #94a3b8;">
-        <p>* Campos obrigatórios. Os dados são salvos localmente no seu navegador.</p>
-    </div>
-</div>
-
-<!-- Tabela de Integrantes -->
+<!-- TOTAL GERAL -->
 <div class="card">
-    <h2>Lista de Integrantes</h2>
-    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-        <div>Total: <strong id="totalIntegrantes">0</strong> integrantes</div>
-        <div id="filtroContainer" class="hidden" style="display: flex; gap: 10px; align-items: center;">
-            <label for="filtroSituacao">Filtrar:</label>
-            <select id="filtroSituacao" style="width: auto;">
-                <option value="todos">Todos</option>
-                <option value="ativo">Ativos</option>
-                <option value="ausente">Ausentes</option>
-                <option value="inativo">Inativos</option>
-            </select>
-            <button id="btnResetFiltro" class="btn" style="padding: 8px 12px; font-size: 12px;">Limpar Filtro</button>
-        </div>
-    </div>
-    <div style="overflow-x: auto;">
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Nome</th>
-                    <th>Graduação</th>
-                    <th>Data Entrada</th>
-                    <th>Última Promoção</th>
-                    <th>Serial</th>
-                    <th>Função</th>
-                    <th>Situação</th>
-                    <th>Ação</th>
-                </tr>
-            </thead>
-            <tbody id="lista"></tbody>
-        </table>
-    </div>
-    <div id="emptyState" class="empty-state hidden">
-        Nenhum integrante cadastrado. Faça login para adicionar o primeiro.
-    </div>
+<h2>📊 Total Geral do Efetivo</h2>
+<p style="font-size:32px;font-weight:bold" id="totalGeral">0</p>
 </div>
 
-<!-- Footer -->
-<footer style="text-align: center; padding: 20px; color: #94a3b8; font-size: 12px; margin-top: 30px;">
-    <p>Sistema de Gerenciamento de Hierarquia PM v1.0 | Dados salvos localmente</p>
-</footer>
+<!-- PAINEL ADMIN -->
+<div id="adminPanel" class="card hidden">
+<h2>👥 Controle de Integrantes</h2>
+<input id="nome" placeholder="Nome completo" />
+<select id="patente"></select>
+<input type="date" id="entrada" />
+<select id="situacao">
+<option value="ativo">Ativo</option>
+<option value="ausente">Ausente</option>
+<option value="inativo">Inativo</option>
+</select>
+<br><br>
+<button class="btn" onclick="add()">Adicionar Integrante</button>
+</div>
+
+<!-- TABELA -->
+<div class="card">
+<h2>📋 Relação de Integrantes</h2>
+<table>
+<thead>
+<tr>
+<th>#</th><th>Nome</th><th>Patente</th><th>Entrada</th><th>Situação</th><th>Ação</th>
+</tr>
+</thead>
+<tbody id="lista"></tbody>
+</table>
+</div>
+
+<!-- ESTATÍSTICAS -->
+<div class="card">
+<h2>📌 Distribuição por Categoria</h2>
+<ul id="estatisticas" style="line-height:2"></ul>
+</div>
 </main>
 
 <script>
-const ADMIN_SENHA = 'ROTA123';
+const ADMIN_SENHA = 'R0TA@Adm#2025!';
 
 const patentes = [
-    {n:'Tenente-Coronel PM ★★☆', o:1, c:'superior'},
-    {n:'Major PM ★☆☆', o:2, c:'superior'},
-    {n:'Capitão PM ☆☆☆', o:3, c:'intermediario'},
-    {n:'1º Tenente PM ✧✧', o:4, c:'subalterno'},
-    {n:'2º Tenente PM ✧', o:5, c:'subalterno'},
-    {n:'Aspirante a Oficial PM ★', o:6, c:'especial'},
-    {n:'Subtenente PM △', o:7, c:'graduado'},
-    {n:'1º Sargento PM ⟩⟩⟩ ⟩⟩', o:8, c:'graduado'},
-    {n:'2º Sargento PM ⟩⟩⟩ ⟩', o:9, c:'graduado'},
-    {n:'3º Sargento PM ⟩⟩⟩', o:10, c:'graduado'},
-    {n:'Cabo PM ⟩⟩', o:11, c:'praca'},
-    {n:'Soldado de 1º Classe PM ⟩', o:12, c:'praca'},
-    {n:'Soldado de 2º Classe PM', o:13, c:'praca'}
+ {n:'Tenente-Coronel PM',o:1,c:'superior'},
+ {n:'Major PM',o:2,c:'superior'},
+ {n:'Capitão PM',o:3,c:'intermediario'},
+ {n:'1º Tenente PM',o:4,c:'subalterno'},
+ {n:'2º Tenente PM',o:5,c:'subalterno'},
+ {n:'Aspirante PM',o:6,c:'especial'},
+ {n:'Subtenente PM',o:7,c:'graduado'},
+ {n:'1º Sargento PM',o:8,c:'graduado'},
+ {n:'2º Sargento PM',o:9,c:'graduado'},
+ {n:'3º Sargento PM',o:10,c:'graduado'},
+ {n:'Cabo PM',o:11,c:'praca'},
+ {n:'Soldado PM',o:12,c:'praca'}
 ];
 
-let dados = JSON.parse(localStorage.getItem('hierarquia_pm_dados')) || [];
-let ultimoIdAdicionado = null;
+let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
 
-// Elementos DOM
-const elementos = {
-    loginBtn: document.getElementById('loginBtn'),
-    logoutBtn: document.getElementById('logoutBtn'),
-    loginModal: document.getElementById('loginModal'),
-    adminPanel: document.getElementById('adminPanel'),
-    closeModal: document.querySelector('.close'),
-    btnEntrar: document.getElementById('btnEntrar'),
-    btnAdicionar: document.getElementById('btnAdicionar'),
-    btnLimpar: document.getElementById('btnLimpar'),
-    btnExportar: document.getElementById('btnExportar'),
-    btnResetFiltro: document.getElementById('btnResetFiltro'),
-    senhaInput: document.getElementById('senha'),
-    nomeInput: document.getElementById('nome'),
-    cpfInput: document.getElementById('cpf'),
-    patenteSelect: document.getElementById('patente'),
-    entradaInput: document.getElementById('entrada'),
-    promocaoInput: document.getElementById('promocao'),
-    serialInput: document.getElementById('serial'),
-    funcaoInput: document.getElementById('funcao'),
-    situacaoSelect: document.getElementById('situacao'),
-    listaTabela: document.getElementById('lista'),
-    totalIntegrantes: document.getElementById('totalIntegrantes'),
-    filtroContainer: document.getElementById('filtroContainer'),
-    filtroSituacao: document.getElementById('filtroSituacao'),
-    emptyState: document.getElementById('emptyState')
+function init(){
+ const sel=document.getElementById('patente');
+ sel.innerHTML='<option value="">Selecione</option>';
+ patentes.forEach(p=>{
+  const o=document.createElement('option');o.value=p.n;o.textContent=p.n;sel.appendChild(o);
+ });
+ render();
+}
+
+function add(){
+ const nome=document.getElementById('nome').value.trim();
+ const pat=document.getElementById('patente').value;
+ if(!nome||!pat)return alert('Preencha os campos');
+ const pObj=patentes.find(p=>p.n===pat);
+ dados.push({id:Date.now(),nome,patente:pat,ordem:pObj.o,classe:pObj.c,entrada:document.getElementById('entrada').value,situacao:document.getElementById('situacao').value});
+ localStorage.setItem('hierarquia_rota',JSON.stringify(dados));
+ render();
+}
+
+function remover(i){
+ if(confirm('Remover integrante?')){dados.splice(i,1);localStorage.setItem('hierarquia_rota',JSON.stringify(dados));render();}
+}
+
+function render(){
+ dados.sort((a,b)=>a.ordem-b.ordem);
+ document.getElementById('totalGeral').textContent=dados.length;
+ const lista=document.getElementById('lista');
+ lista.innerHTML='';
+ const cont={praca:0,graduado:0,especial:0,subalterno:0,intermediario:0,superior:0};
+ dados.forEach((d,i)=>{
+  cont[d.classe]++;
+  const st=d.situacao==='ativo'?'status-ativo':d.situacao==='ausente'?'status-ausente':'status-inativo';
+  lista.innerHTML+=`<tr><td>${i+1}</td><td>${d.nome}</td><td><span class="badge ${d.classe}">${d.patente}</span></td><td>${d.entrada||'-'}</td><td class="${d.situacao}"><span class="status-indicator ${st}"></span>${d.situacao.toUpperCase()}</td><td><button class="btn-danger" onclick="remover(${i})">X</button></td></tr>`;
+ });
+ document.getElementById('estatisticas').innerHTML=`
+ <li>Praças: ${cont.praca}</li>
+ <li>Praças Graduadas: ${cont.graduado}</li>
+ <li>Praças Especiais: ${cont.especial}</li>
+ <li>Oficiais Subalternos: ${cont.subalterno}</li>
+ <li>Oficiais Intermediários: ${cont.intermediario}</li>
+ <li>Oficiais Superiores: ${cont.superior}</li>`;
+}
+
+document.getElementById('loginBtn').onclick=()=>{
+ const s=prompt('Senha administrativa');
+ if(s===ADMIN_SENHA){document.getElementById('adminPanel').classList.remove('hidden');document.getElementById('loginBtn').classList.add('hidden');document.getElementById('logoutBtn').classList.remove('hidden');}
 };
 
-// Inicializar o select de patentes
-function inicializarPatentes() {
-    elementos.patenteSelect.innerHTML = '<option value="">Selecione uma patente</option>';
-    patentes.forEach(p => {
-        const op = document.createElement('option');
-        op.value = p.n;
-        op.textContent = p.n;
-        elementos.patenteSelect.appendChild(op);
-    });
-}
+document.getElementById('logoutBtn').onclick=()=>location.reload();
 
-// Event Listeners
-function inicializarEventos() {
-    elementos.loginBtn.addEventListener('click', openLoginModal);
-    elementos.closeModal.addEventListener('click', closeLoginModal);
-    elementos.logoutBtn.addEventListener('click', logout);
-    elementos.btnEntrar.addEventListener('click', login);
-    elementos.btnAdicionar.addEventListener('click', add);
-    elementos.btnLimpar.addEventListener('click', limparForm);
-    elementos.btnExportar.addEventListener('click', exportarDados);
-    elementos.btnResetFiltro.addEventListener('click', () => {
-        elementos.filtroSituacao.value = 'todos';
-        render();
-    });
-    elementos.filtroSituacao.addEventListener('change', render);
-    
-    // Fechar modal com ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeLoginModal();
-    });
-    
-    // Fechar modal ao clicar fora
-    window.addEventListener('click', (event) => {
-        if (event.target === elementos.loginModal) {
-            closeLoginModal();
-        }
-    });
-}
-
-// Modal functions
-function openLoginModal() {
-    elementos.loginModal.style.display = 'block';
-    elementos.senhaInput.focus();
-}
-
-function closeLoginModal() {
-    elementos.loginModal.style.display = 'none';
-    elementos.senhaInput.value = '';
-}
-
-function login() {
-    const senha = elementos.senhaInput.value.trim();
-    if (senha === ADMIN_SENHA) {
-        localStorage.setItem('hierarquia_pm_logado', '1');
-        elementos.loginBtn.classList.add('hidden');
-        elementos.logoutBtn.classList.remove('hidden');
-        elementos.adminPanel.classList.remove('hidden');
-        elementos.filtroContainer.classList.remove('hidden');
-        closeLoginModal();
-        render();
-        showNotification('Login realizado com sucesso!', 'success');
-    } else {
-        showNotification('Senha incorreta! Tente novamente.', 'error');
-        elementos.senhaInput.value = '';
-        elementos.senhaInput.focus();
-    }
-}
-
-function logout() {
-    if (confirm('Deseja realmente sair do modo administrador?')) {
-        localStorage.removeItem('hierarquia_pm_logado');
-        elementos.loginBtn.classList.remove('hidden');
-        elementos.logoutBtn.classList.add('hidden');
-        elementos.adminPanel.classList.add('hidden');
-        elementos.filtroContainer.classList.add('hidden');
-        render();
-        showNotification('Logout realizado!', 'info');
-    }
-}
-
-function limparForm() {
-    elementos.cpfInput.value = '';
-    elementos.nomeInput.value = '';
-    elementos.entradaInput.value = '';
-    elementos.promocaoInput.value = '';
-    elementos.serialInput.value = '';
-    elementos.funcaoInput.value = '';
-    elementos.situacaoSelect.value = 'ativo';
-    elementos.patenteSelect.value = '';
-    elementos.nomeInput.focus();
-}
-
-function add() {
-    const nomeV = elementos.nomeInput.value.trim();
-    const patV = elementos.patenteSelect.value;
-    
-    if (!nomeV) {
-        showNotification('Informe o nome do integrante', 'error');
-        elementos.nomeInput.focus();
-        return;
-    }
-    
-    if (!patV) {
-        showNotification('Selecione uma patente', 'error');
-        return;
-    }
-    
-    const pObj = patentes.find(p => p.n === patV);
-    
-    // Formatar data atual se não informada
-    const dataAtual = new Date().toISOString().split('T')[0];
-    
-    const novoIntegrante = {
-        id: Date.now() + Math.random(),
-        cpf: elementos.cpfInput.value.trim() || 'Não informado',
-        nome: nomeV,
-        patente: patV,
-        ordem: pObj.o,
-        classe: pObj.c,
-        entrada: elementos.entradaInput.value || dataAtual,
-        promocao: elementos.promocaoInput.value || dataAtual,
-        serial: elementos.serialInput.value.trim() || 'Não informado',
-        funcao: elementos.funcaoInput.value.trim() || 'Não definida',
-        situacao: elementos.situacaoSelect.value,
-        dataCadastro: new Date().toISOString()
-    };
-    
-    // Adicionar ao array
-    dados.push(novoIntegrante);
-    
-    // Salvar no localStorage
-    salvarDados();
-    
-    // Guardar o ID para highlight
-    ultimoIdAdicionado = novoIntegrante.id;
-    
-    // Limpar formulário
-    limparForm();
-    
-    // Atualizar a tabela
-    render();
-    
-    showNotification(`Integrante ${nomeV} adicionado com sucesso!`, 'success');
-}
-
-function remover(index) {
-    if (confirm('Tem certeza que deseja remover este integrante?')) {
-        const removido = dados[index].nome;
-        dados.splice(index, 1);
-        salvarDados();
-        render();
-        showNotification(`Integrante ${removido} removido!`, 'info');
-    }
-}
-
-function salvarDados() {
-    localStorage.setItem('hierarquia_pm_dados', JSON.stringify(dados));
-}
-
-function formatarData(data) {
-    if (!data) return '-';
-    try {
-        const [ano, mes, dia] = data.split('-');
-        return `${dia}/${mes}/${ano}`;
-    } catch {
-        return data;
-    }
-}
-
-function exportarDados() {
-    if (dados.length === 0) {
-        showNotification('Não há dados para exportar', 'error');
-        return;
-    }
-    
-    const dadosParaExportar = dados.map(d => ({
-        ...d,
-        entrada: formatarData(d.entrada),
-        promocao: formatarData(d.promocao)
-    }));
-    
-    const dataStr = JSON.stringify(dadosParaExportar, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `hierarquia-pm-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    showNotification('Dados exportados com sucesso!', 'success');
-}
-
-function showNotification(mensagem, tipo) {
-    // Cria uma notificação temporária
-    const notification = document.createElement('div');
-    notification.textContent = mensagem;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-    `;
-    
-    if (tipo === 'success') {
-        notification.style.background = '#22c55e';
-    } else if (tipo === 'error') {
-        notification.style.background = '#ef4444';
-    } else {
-        notification.style.background = '#3b82f6';
-    }
-    
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease-in';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// Adicionar estilos de animação
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
-
-function render() {
-    const lista = elementos.listaTabela;
-    
-    // Filtrar dados se necessário
-    let dadosFiltrados = [...dados];
-    const filtro = elementos.filtroSituacao.value;
-    
-    if (filtro !== 'todos') {
-        dadosFiltrados = dados.filter(d => d.situacao === filtro);
-    }
-    
-    // Ordenar por hierarquia (ordem numérica)
-    dadosFiltrados.sort((a, b) => a.ordem - b.ordem);
-    
-    // Atualizar contador
-    elementos.totalIntegrantes.textContent = dados.length;
-    
-    if (dadosFiltrados.length === 0) {
-        lista.innerHTML = '';
-        elementos.emptyState.classList.remove('hidden');
-        return;
-    }
-    
-    elementos.emptyState.classList.add('hidden');
-    lista.innerHTML = '';
-    
-    dadosFiltrados.forEach((d, i) => {
-        const linha = document.createElement('tr');
-        
-        // Adicionar classe para novo registro
-        if (d.id === ultimoIdAdicionado) {
-            linha.classList.add('novo-registro');
-        }
-        
-        // Adicionar classe para linha baseada na situação
-        if (d.situacao === 'inativo') {
-            linha.style.opacity = '0.7';
-        }
-        
-        // Status indicator
-        let statusIcon = '';
-        if (d.situacao === 'ativo') statusIcon = '<span class="status-indicator status-ativo"></span>';
-        else if (d.situacao === 'ausente') statusIcon = '<span class="status-indicator status-ausente"></span>';
-        else statusIcon = '<span class="status-indicator status-inativo"></span>';
-        
-        // Botão de remover (apenas se logado)
-        let acaoBtn = '';
-        if (localStorage.getItem('hierarquia_pm_logado')) {
-            // Encontrar o índice real no array original
-            const indexOriginal = dados.findIndex(item => item.id === d.id);
-            acaoBtn = `<button class='btn-danger' onclick='remover(${indexOriginal})' title='Remover integrante'>X</button>`;
-        } else {
-            acaoBtn = '<span style="color: #94a3b8; font-size: 12px;">Login necessário</span>';
-        }
-        
-        linha.innerHTML = `
-            <td>${i + 1}</td>
-            <td style="font-weight: 500;">${d.nome}</td>
-            <td><span class="badge ${d.classe}">${d.patente}</span></td>
-            <td>${formatarData(d.entrada)}</td>
-            <td>${formatarData(d.promocao)}</td>
-            <td>${d.serial}</td>
-            <td>${d.funcao}</td>
-            <td class="${d.situacao}">${statusIcon} ${d.situacao.toUpperCase()}</td>
-            <td>${acaoBtn}</td>
-        `;
-        
-        lista.appendChild(linha);
-    });
-    
-    // Resetar o último ID adicionado
-    if (ultimoIdAdicionado) {
-        setTimeout(() => {
-            ultimoIdAdicionado = null;
-            // Remover highlight de todas as linhas
-            document.querySelectorAll('.novo-registro').forEach(row => {
-                row.classList.remove('novo-registro');
-            });
-        }, 2000);
-    }
-}
-
-// Inicializar a aplicação
-function init() {
-    // Configurar data atual nos campos de data
-    const hoje = new Date().toISOString().split('T')[0];
-    elementos.entradaInput.value = hoje;
-    elementos.promocaoInput.value = hoje;
-    
-    // Verificar login
-    if (localStorage.getItem('hierarquia_pm_logado')) {
-        elementos.loginBtn.classList.add('hidden');
-        elementos.logoutBtn.classList.remove('hidden');
-        elementos.adminPanel.classList.remove('hidden');
-        elementos.filtroContainer.classList.remove('hidden');
-    }
-    
-    // Inicializar componentes
-    inicializarPatentes();
-    inicializarEventos();
-    render();
-    
-    // Mostrar mensagem de boas-vindas
-    setTimeout(() => {
-        if (dados.length === 0) {
-            showNotification('Bem-vindo ao Sistema de Hierarquia PM! Use a senha ROTA123 para login.', 'info');
-        }
-    }, 1000);
-}
-
-// Iniciar quando o DOM estiver carregado
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+init();
 </script>
 </body>
 </html>
