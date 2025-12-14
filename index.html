@@ -19,6 +19,8 @@ button{padding:10px 16px;border-radius:6px;border:none;font-weight:bold;cursor:p
 .btn-danger:hover{background:#555}
 .btn-success{background:#666;color:#fff}
 .btn-success:hover{background:#777}
+.btn-purple{background:#8b5cf6;color:#fff}
+.btn-purple:hover{background:#7c3aed}
 
 input,select{background:#0f0f0f;color:#fff;border:1px solid #444;padding:10px;border-radius:6px;width:100%;margin-bottom:10px;box-sizing:border-box}
 input:focus,select:focus{outline:none;border-color:#888}
@@ -28,13 +30,14 @@ th,td{padding:12px;border-bottom:1px solid #333;text-align:left;font-size:14px}
 th{background:#111}
 tr:hover{background:#1a1a1a}
 
-.badge{padding:6px 12px;border-radius:999px;font-weight:bold;border:1px solid #000;display:inline-block;min-width:150px;text-align:center}
-.superior{background:#fff;color:#000;border:1px solid #aaa}
-.intermediario{background:#fff;color:#000;border:1px solid #aaa}
-.subalterno{background:#fff;color:#000;border:1px solid #aaa}
-.especial{background:#fff;color:#000;border:1px solid #aaa}
-.graduado{background:#fff;color:#000;border:1px solid #aaa}
-.praca{background:#fff;color:#000;border:1px solid #aaa}
+/* CORES DAS PATENTES CONFORME SOLICITADO */
+.badge{padding:6px 12px;border-radius:999px;font-weight:bold;border:1px solid #000;display:inline-block;min-width:180px;text-align:center}
+.superior{background:#ffffff;color:#000000 !important;border:1px solid #aaa} /* BRANCO */
+.intermediario{background:#22c55e;color:#000000 !important;border:1px solid #166534} /* VERDE */
+.subalterno{background:#facc15;color:#000000 !important;border:1px solid #a16207} /* AMARELO */
+.especial{background:#3b82f6;color:#ffffff !important;border:1px solid #1e40af} /* AZUL */
+.graduado{background:#ef4444;color:#ffffff !important;border:1px solid #991b1b} /* VERMELHO */
+.praca{background:#9ca3af;color:#000000 !important;border:1px solid #6b7280} /* CINZA */
 
 .hidden{display:none}
 
@@ -60,6 +63,7 @@ tr:hover{background:#1a1a1a}
 .total-card{background:#111;padding:15px;border-radius:8px;text-align:center}
 .total-card h3{margin:0 0 10px 0;color:#aaa;font-size:14px}
 .total-card .numero{font-size:32px;font-weight:bold;color:#fff}
+.total-card.estagio .numero{color:#a855f7} /* ROXO PARA ESTÁGIOS */
 
 /* LOGIN MODAL */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8)}
@@ -67,6 +71,17 @@ tr:hover{background:#1a1a1a}
 .modal h2{margin-top:0;color:#fff;text-align:center}
 .close{color:#888;float:right;font-size:28px;font-weight:bold;cursor:pointer}
 .close:hover{color:#fff}
+
+/* NOVO REGISTRO */
+.novo-registro{animation:highlight 2s ease-in-out}
+@keyframes highlight{0%{background:rgba(255,255,255,0.1)}100%{background:transparent}}
+
+/* CHECKBOX ESTÁGIO */
+.checkbox-container{display:flex;align-items:center;gap:10px;margin-top:10px}
+.checkbox-container input[type="checkbox"]{width:20px;height:20px;margin:0}
+
+/* ÍCONE DE ESTÁGIO */
+.estagio-icon{color:#a855f7;margin-left:5px}
 </style>
 </head>
 <body>
@@ -98,8 +113,20 @@ tr:hover{background:#1a1a1a}
 <div class="numero" id="totalSubalternos">0</div>
 </div>
 <div class="total-card">
+<h3>Praças Especiais</h3>
+<div class="numero" id="totalEspeciais">0</div>
+</div>
+<div class="total-card">
+<h3>Praças Graduadas</h3>
+<div class="numero" id="totalGraduadas">0</div>
+</div>
+<div class="total-card">
 <h3>Praças</h3>
 <div class="numero" id="totalPracas">0</div>
+</div>
+<div class="total-card estagio">
+<h3>Estagiários</h3>
+<div class="numero" id="totalEstagios">0</div>
 </div>
 </div>
 </div>
@@ -129,9 +156,20 @@ tr:hover{background:#1a1a1a}
 <option value="inativo">INATIVO</option>
 </select></div>
 </div>
+
+<!-- CHECKBOX PARA ESTÁGIO -->
+<div class="checkbox-container">
+<input type="checkbox" id="estagio" />
+<label for="estagio" style="font-weight:bold;color:#a855f7">🎓 MARCAR COMO ESTAGIÁRIO</label>
+</div>
+<div style="margin:10px 0;padding:10px;background:#1a1a1a;border-radius:6px;border-left:4px solid #a855f7">
+<small style="color:#d8b4fe;">ℹ️ Estagiários aparecem na categoria especial "ESTÁGIOS" abaixo de Praças, mantendo a cor normal da patente.</small>
+</div>
+
 <br>
 <button class="btn" onclick="add()">✅ ADICIONAR INTEGRANTE</button>
 <button class="btn-success" onclick="exportarDados()" style="margin-left:10px">📥 EXPORTAR DADOS</button>
+<button class="btn-purple" onclick="moverParaEstagio()" style="margin-left:10px" id="btnMoverEstagio">🔄 MARCAR COMO ESTAGIÁRIO</button>
 <button class="btn-danger" onclick="limparForm()" style="margin-left:10px">🗑️ LIMPAR FORMULÁRIO</button>
 </div>
 
@@ -174,15 +212,28 @@ tr:hover{background:#1a1a1a}
 </div>
 </div>
 
-<!-- CATEGORIA: PRAÇAS ESPECIAIS/GRADUADAS -->
+<!-- CATEGORIA: PRAÇAS ESPECIAIS -->
 <div class="categoria-container">
-<div class="categoria-header">PRAÇAS ESPECIAIS/GRADUADAS</div>
+<div class="categoria-header">PRAÇAS ESPECIAIS</div>
 <div class="card">
 <table>
 <thead>
 <tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
 </thead>
 <tbody id="lista-especiais"></tbody>
+</table>
+</div>
+</div>
+
+<!-- CATEGORIA: PRAÇAS GRADUADAS -->
+<div class="categoria-container">
+<div class="categoria-header">PRAÇAS GRADUADAS</div>
+<div class="card">
+<table>
+<thead>
+<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+</thead>
+<tbody id="lista-graduadas"></tbody>
 </table>
 </div>
 </div>
@@ -200,25 +251,66 @@ tr:hover{background:#1a1a1a}
 </div>
 </div>
 
+<!-- CATEGORIA: ESTÁGIOS (AGORA ABAIXO DE PRAÇAS) -->
+<div class="categoria-container">
+<div class="categoria-header" style="border-left-color:#a855f7">🎓 ESTÁGIOS</div>
+<div class="card">
+<table>
+<thead>
+<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+</thead>
+<tbody id="lista-estagios"></tbody>
+</table>
+</div>
+</div>
+
+<!-- ESTATÍSTICAS -->
+<div class="card">
+<h2>📌 DISTRIBUIÇÃO POR CATEGORIA</h2>
+<ul id="estatisticas" style="line-height:2;list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUPERIORES: <span id="stat-superior" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS INTERMEDIÁRIOS: <span id="stat-intermediario" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUBALTERNOS: <span id="stat-subalterno" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS ESPECIAIS: <span id="stat-especial" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS GRADUADAS: <span id="stat-graduado" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS: <span id="stat-praca" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px;border-left:4px solid #a855f7">ESTÁGIOS: <span id="stat-estagio" style="float:right;font-weight:bold;color:#a855f7">0</span></li>
+</ul>
+</div>
+</main>
+
 <script>
 const ADMIN_SENHA = 'R0TA@Adm#2025!';
 
+// PATENTES COM SÍMBOLOS - SEPARADO POR CATEGORIA CORRETA
 const patentes = [
- {n:'TENENTE-CORONEL PM', o:1, c:'superior'},
- {n:'MAJOR PM', o:2, c:'superior'},
- {n:'CAPITÃO PM', o:3, c:'intermediario'},
- {n:'1º TENENTE PM', o:4, c:'subalterno'},
- {n:'2º TENENTE PM', o:5, c:'subalterno'},
- {n:'ASPIRANTE PM', o:6, c:'especial'},
- {n:'SUBTENENTE PM', o:7, c:'graduado'},
- {n:'1º SARGENTO PM', o:8, c:'graduado'},
- {n:'2º SARGENTO PM', o:9, c:'graduado'},
- {n:'3º SARGENTO PM', o:10, c:'graduado'},
- {n:'CABO PM', o:11, c:'praca'},
- {n:'SOLDADO PM', o:12, c:'praca'}
+ // OFICIAIS SUPERIORES - BRANCO
+ {n:'TENENTE-CORONEL PM ★★☆', o:1, c:'superior'},
+ {n:'MAJOR PM ★☆☆', o:2, c:'superior'},
+ 
+ // OFICIAIS INTERMEDIÁRIOS - VERDE
+ {n:'CAPITÃO PM ☆☆☆', o:3, c:'intermediario'},
+ 
+ // OFICIAIS SUBALTERNOS - AMARELO
+ {n:'1º TENENTE PM ✧✧', o:4, c:'subalterno'},
+ {n:'2º TENENTE PM ✧', o:5, c:'subalterno'},
+ 
+ // PRAÇAS ESPECIAIS - AZUL
+ {n:'ASPIRANTE PM ★', o:6, c:'especial'},
+ 
+ // PRAÇAS GRADUADAS - VERMELHO
+ {n:'SUBTENENTE PM △', o:7, c:'graduado'},
+ {n:'1º SARGENTO PM ⟩⟩⟩ ⟩⟩', o:8, c:'graduado'},
+ {n:'2º SARGENTO PM ⟩⟩⟩ ⟩', o:9, c:'graduado'},
+ {n:'3º SARGENTO PM ⟩⟩⟩', o:10, c:'graduado'},
+ 
+ // PRAÇAS - CINZA
+ {n:'CABO PM ⟩⟩', o:11, c:'praca'},
+ {n:'SOLDADO PM ⟩', o:12, c:'praca'}
 ];
 
 let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
+let ultimoIdAdicionado = null;
 
 function init(){
  const sel = document.getElementById('patente');
@@ -238,6 +330,7 @@ function init(){
  document.getElementById('loginBtn').onclick = openLoginModal;
  document.getElementById('logoutBtn').onclick = logout;
  document.getElementById('btnEntrar').onclick = login;
+ document.getElementById('btnMoverEstagio').onclick = moverParaEstagio;
  document.querySelector('.close').onclick = closeLoginModal;
  
  // Fechar modal ao clicar fora
@@ -295,6 +388,7 @@ function limparForm() {
  document.getElementById('entrada').value = new Date().toISOString().split('T')[0];
  document.getElementById('situacao').value = 'ativo';
  document.getElementById('patente').value = '';
+ document.getElementById('estagio').checked = false;
  document.getElementById('nome').focus();
 }
 
@@ -302,6 +396,7 @@ function add() {
  const cpf = document.getElementById('cpf').value.trim();
  const nome = document.getElementById('nome').value.trim();
  const pat = document.getElementById('patente').value;
+ const isEstagio = document.getElementById('estagio').checked;
  
  if (!nome || !pat) {
   alert('PREENCHA O NOME E A PATENTE');
@@ -309,22 +404,44 @@ function add() {
  }
  
  const pObj = patentes.find(p => p.n === pat);
- dados.push({
-  id: Date.now(),
+ if (!pObj) {
+  alert('PATENTE INVÁLIDA');
+  return;
+ }
+ 
+ const novoId = Date.now();
+ const novoIntegrante = {
+  id: novoId,
   cpf: cpf || 'NÃO INFORMADO',
   nome: nome,
   patente: pat,
   funcao: document.getElementById('funcao').value.trim() || 'NÃO DEFINIDA',
   ordem: pObj.o,
-  classe: pObj.c,
+  classe: pObj.c, // Mantém a classe original da patente
   entrada: document.getElementById('entrada').value,
-  situacao: document.getElementById('situacao').value
- });
+  situacao: document.getElementById('situacao').value,
+  dataCadastro: new Date().toISOString(),
+  isEstagio: isEstagio // Flag para identificar estagiário
+ };
  
+ dados.push(novoIntegrante);
  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+ 
+ // Marcar para highlight
+ ultimoIdAdicionado = novoId;
+ 
  limparForm();
  render();
- alert(`${nome.toUpperCase()} CADASTRADO COMO ${pat}`);
+ 
+ const categoria = isEstagio ? 'ESTÁGIOS' : 'REGULAR';
+ alert(`${nome.toUpperCase()} CADASTRADO COMO ${pat} - ${categoria}`);
+}
+
+function moverParaEstagio() {
+ // Encontrar o último integrante selecionado na tabela (se houver seleção)
+ // Esta função poderia ser usada para mover um integrante existente para estágio
+ // Por enquanto, vamos apenas mostrar uma mensagem
+ alert('Para marcar como estagiário, use a caixa de seleção "MARCAR COMO ESTAGIÁRIO" no formulário.\n\nOu selecione um integrante na tabela para mover para estágio.');
 }
 
 function remover(i) {
@@ -333,6 +450,16 @@ function remover(i) {
   localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
   render();
  }
+}
+
+function toggleEstagio(i) {
+ const integrante = dados[i];
+ integrante.isEstagio = !integrante.isEstagio;
+ localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+ render();
+ 
+ const acao = integrante.isEstagio ? 'marcado como ESTAGIÁRIO' : 'removido dos ESTÁGIOS';
+ alert(`${integrante.nome} ${acao}`);
 }
 
 function exportarDados() {
@@ -352,7 +479,8 @@ function exportarDados() {
    funcao: d.funcao,
    entrada: d.entrada,
    situacao: d.situacao,
-   categoria: d.classe
+   categoria: d.classe,
+   isEstagio: d.isEstagio || false
   }))
  };
  
@@ -369,6 +497,7 @@ function exportarDados() {
 }
 
 function render() {
+ // Ordenar por hierarquia
  dados.sort((a, b) => a.ordem - b.ordem);
  
  // Totais gerais
@@ -376,6 +505,7 @@ function render() {
  
  // Contadores por categoria
  const contadores = {
+  estagio: 0,
   superior: 0,
   intermediario: 0,
   subalterno: 0,
@@ -385,8 +515,13 @@ function render() {
  };
  
  dados.forEach(d => {
+  // Contar por categoria real da patente
   if (contadores[d.classe] !== undefined) {
    contadores[d.classe]++;
+  }
+  // Contar estagiários separadamente
+  if (d.isEstagio) {
+   contadores.estagio++;
   }
  });
  
@@ -394,7 +529,10 @@ function render() {
  document.getElementById('totalSuperiores').textContent = contadores.superior;
  document.getElementById('totalIntermediarios').textContent = contadores.intermediario;
  document.getElementById('totalSubalternos').textContent = contadores.subalterno;
- document.getElementById('totalPracas').textContent = contadores.praca + contadores.graduado + contadores.especial;
+ document.getElementById('totalEspeciais').textContent = contadores.especial;
+ document.getElementById('totalGraduadas').textContent = contadores.graduado;
+ document.getElementById('totalPracas').textContent = contadores.praca;
+ document.getElementById('totalEstagios').textContent = contadores.estagio;
  
  // Atualizar estatísticas
  document.getElementById('stat-superior').textContent = contadores.superior;
@@ -403,18 +541,20 @@ function render() {
  document.getElementById('stat-especial').textContent = contadores.especial;
  document.getElementById('stat-graduado').textContent = contadores.graduado;
  document.getElementById('stat-praca').textContent = contadores.praca;
+ document.getElementById('stat-estagio').textContent = contadores.estagio;
  
- // Limpar tabelas
- const tabelas = {
-  'superior': 'lista-superiores',
-  'intermediario': 'lista-intermediarios',
-  'subalterno': 'lista-subalternos',
-  'especial': 'lista-especiais',
-  'graduado': 'lista-especiais', // Mesma tabela que especiais
-  'praca': 'lista-pracas'
- };
+ // Limpar todas as tabelas
+ const tabelasIds = [
+  'lista-superiores',
+  'lista-intermediarios', 
+  'lista-subalternos',
+  'lista-especiais',
+  'lista-graduadas',
+  'lista-pracas',
+  'lista-estagios'
+ ];
  
- Object.values(tabelas).forEach(id => {
+ tabelasIds.forEach(id => {
   document.getElementById(id).innerHTML = '';
  });
  
@@ -422,23 +562,65 @@ function render() {
  dados.forEach((d, i) => {
   const statusClass = d.situacao === 'ativo' ? 'status-ativo' : d.situacao === 'ausente' ? 'status-ausente' : 'status-inativo';
   
-  const row = `
-   <tr>
-    <td>${i+1}</td>
-    <td>${d.cpf}</td>
-    <td>${d.nome}</td>
-    <td><span class="badge ${d.classe}">${d.patente}</span></td>
-    <td>${d.funcao}</td>
-    <td>${d.entrada || '-'}</td>
-    <td class="${d.situacao}"><span class="status-indicator ${statusClass}"></span>${d.situacao.toUpperCase()}</td>
-    <td>${localStorage.getItem('logado') ? `<button class="btn-danger" onclick="remover(${i})">X</button>` : '🔒'}</td>
-   </tr>
+  const row = document.createElement('tr');
+  row.setAttribute('data-id', d.id);
+  
+  // Adicionar classe de highlight se for o último adicionado
+  if (d.id === ultimoIdAdicionado) {
+   row.classList.add('novo-registro');
+  }
+  
+  // Determinar a cor da badge (classe normal da patente)
+  const badgeClass = d.classe;
+  
+  // Determinar em qual tabela colocar
+  let tabelaId;
+  if (d.isEstagio) {
+   // Estagiários vão para a tabela especial
+   tabelaId = 'lista-estagios';
+  } else {
+   // Não estagiários vão para suas tabelas normais
+   switch(d.classe) {
+    case 'superior':
+     tabelaId = 'lista-superiores';
+     break;
+    case 'intermediario':
+     tabelaId = 'lista-intermediarios';
+     break;
+    case 'subalterno':
+     tabelaId = 'lista-subalternos';
+     break;
+    case 'especial':
+     tabelaId = 'lista-especiais';
+     break;
+    case 'graduado':
+     tabelaId = 'lista-graduadas';
+     break;
+    case 'praca':
+     tabelaId = 'lista-pracas';
+     break;
+    default:
+     tabelaId = 'lista-pracas';
+   }
+  }
+  
+  row.innerHTML = `
+   <td>${i+1}</td>
+   <td>${d.cpf}</td>
+   <td style="font-weight:bold">${d.nome}</td>
+   <td><span class="badge ${badgeClass}">${d.patente}</span></td>
+   <td>${d.funcao}</td>
+   <td>${d.entrada || '-'}</td>
+   <td class="${d.situacao}"><span class="status-indicator ${statusClass}"></span>${d.situacao.toUpperCase()}</td>
+   <td>
+    ${localStorage.getItem('logado') ? 
+      `<button class="btn-danger" onclick="remover(${i})" style="margin-right:5px">X</button>
+       ${!d.isEstagio ? `<button class="btn-purple" onclick="toggleEstagio(${i})" title="Mover para Estágios">🎓</button>` : `<button class="btn" onclick="toggleEstagio(${i})" title="Remover dos Estágios">📋</button>`}` 
+      : '🔒'}
+   </td>
   `;
   
-  const tabelaId = tabelas[d.classe];
-  if (tabelaId) {
-   document.getElementById(tabelaId).innerHTML += row;
-  }
+  document.getElementById(tabelaId).appendChild(row);
  });
  
  // Verificar login
@@ -446,6 +628,19 @@ function render() {
   document.getElementById('adminPanel').classList.remove('hidden');
   document.getElementById('loginBtn').classList.add('hidden');
   document.getElementById('logoutBtn').classList.remove('hidden');
+ } else {
+  document.getElementById('adminPanel').classList.add('hidden');
+  document.getElementById('loginBtn').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.add('hidden');
+ }
+ 
+ // Remover highlight após 2 segundos
+ if (ultimoIdAdicionado) {
+  setTimeout(() => {
+   ultimoIdAdicionado = null;
+   const rows = document.querySelectorAll('.novo-registro');
+   rows.forEach(row => row.classList.remove('novo-registro'));
+  }, 2000);
  }
 }
 
