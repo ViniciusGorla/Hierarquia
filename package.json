@@ -1,13 +1,8 @@
 {
-  "name": "hierarquia-pm",
+  "name": "hierarquia-rota",
   "version": "1.0.0",
-  "description": "Sistema de hierarquia da Polícia Militar",
+  "type": "module",
   "scripts": {
-    "dev": "echo 'Servidor de desenvolvimento'",
-    "build": "echo 'Build de site estático'",
-    "start": "echo 'Iniciando servidor'"
-  },
-  "keywords": ["hierarquia", "pm", "polícia", "administração"],
-  "author": "",
-  "license": "MIT"
+    "dev": "echo 'Dev server'"
+  }
 }
