@@ -82,11 +82,29 @@ tr:hover{background:#1a1a1a}
 
 /* ÍCONE DE ESTÁGIO */
 .estagio-icon{color:#a855f7;margin-left:5px}
+
+/* LOADING SPINNER */
+.spinner {
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #fff;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 10px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
 <header>
-<h1>🔒 HIERARQUIA DE ROTA</h1>
+<h1> HIERARQUIA DE ROTA</h1>
 <button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
 <button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
@@ -137,7 +155,10 @@ tr:hover{background:#1a1a1a}
 <span class="close">&times;</span>
 <h2>🔐 ACESSO RESTRITO</h2>
 <input type="password" id="senha" placeholder="Senha de administrador" autocomplete="off" />
-<button class="btn" id="btnEntrar" style="width:100%">VERIFICAR CREDENCIAIS</button>
+<button class="btn" id="btnEntrar" style="width:100%">
+<span id="spinner" class="hidden"></span>
+<span id="btnText">VERIFICAR CREDENCIAIS</span>
+</button>
 </div>
 </div>
 
@@ -264,24 +285,9 @@ tr:hover{background:#1a1a1a}
 </div>
 </div>
 
-<!-- ESTATÍSTICAS -->
-<div class="card">
-<h2>📌 DISTRIBUIÇÃO POR CATEGORIA</h2>
-<ul id="estatisticas" style="line-height:2;list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUPERIORES: <span id="stat-superior" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS INTERMEDIÁRIOS: <span id="stat-intermediario" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUBALTERNOS: <span id="stat-subalterno" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS ESPECIAIS: <span id="stat-especial" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS GRADUADAS: <span id="stat-graduado" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS: <span id="stat-praca" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px;border-left:4px solid #a855f7">ESTÁGIOS: <span id="stat-estagio" style="float:right;font-weight:bold;color:#a855f7">0</span></li>
-</ul>
-</div>
-</main>
+
 
 <script>
-const ADMIN_SENHA = 'R0TA@Adm#2025!';
-
 // PATENTES COM SÍMBOLOS - SEPARADO POR CATEGORIA CORRETA
 const patentes = [
  // OFICIAIS SUPERIORES - BRANCO
@@ -356,27 +362,65 @@ function openLoginModal() {
 function closeLoginModal() {
  document.getElementById('loginModal').style.display = 'none';
  document.getElementById('senha').value = '';
+ // Resetar estado do botão
+ const spinner = document.getElementById('spinner');
+ const btnText = document.getElementById('btnText');
+ spinner.classList.add('hidden');
+ spinner.innerHTML = '';
+ btnText.textContent = 'VERIFICAR CREDENCIAIS';
 }
 
-function login() {
+async function login() {
  const senha = document.getElementById('senha').value;
- if (senha === ADMIN_SENHA) {
-  localStorage.setItem('logado', '1');
-  document.getElementById('adminPanel').classList.remove('hidden');
-  document.getElementById('loginBtn').classList.add('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
-  closeLoginModal();
-  alert('ACESSO ADMINISTRATIVO CONCEDIDO');
- } else {
-  alert('SENHA INCORRETA');
-  document.getElementById('senha').value = '';
-  document.getElementById('senha').focus();
+
+ if (!senha) {
+  alert('DIGITE A SENHA');
+  return;
+ }
+
+ // Mostrar loading
+ const spinner = document.getElementById('spinner');
+ const btnText = document.getElementById('btnText');
+ spinner.classList.remove('hidden');
+ spinner.innerHTML = '<div class="spinner"></div>';
+ btnText.textContent = 'VERIFICANDO...';
+ 
+ try {
+  const res = await fetch('/api/login', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ senha })
+  });
+
+  if (res.ok) {
+   // Login bem-sucedido
+   sessionStorage.setItem('logado', '1');
+   
+   document.getElementById('adminPanel').classList.remove('hidden');
+   document.getElementById('loginBtn').classList.add('hidden');
+   document.getElementById('logoutBtn').classList.remove('hidden');
+   
+   closeLoginModal();
+   alert('ACESSO ADMINISTRATIVO CONCEDIDO');
+  } else {
+   alert('SENHA INCORRETA');
+   document.getElementById('senha').value = '';
+   document.getElementById('senha').focus();
+  }
+ } catch (e) {
+  alert('ERRO AO CONECTAR NO SERVIDOR');
+  console.error('Erro de conexão:', e);
+ } finally {
+  // Esconder loading
+  spinner.classList.add('hidden');
+  spinner.innerHTML = '';
+  btnText.textContent = 'VERIFICAR CREDENCIAIS';
  }
 }
 
 function logout() {
  if (confirm('SAIR DO MODO ADMINISTRATIVO?')) {
-  localStorage.removeItem('logado');
+  sessionStorage.removeItem('logado');
   location.reload();
  }
 }
@@ -558,6 +602,9 @@ function render() {
   document.getElementById(id).innerHTML = '';
  });
  
+ // Verificar se está logado (usando sessionStorage)
+ const isLogado = sessionStorage.getItem('logado') === '1';
+ 
  // Preencher tabelas por categoria
  dados.forEach((d, i) => {
   const statusClass = d.situacao === 'ativo' ? 'status-ativo' : d.situacao === 'ausente' ? 'status-ausente' : 'status-inativo';
@@ -613,7 +660,7 @@ function render() {
    <td>${d.entrada || '-'}</td>
    <td class="${d.situacao}"><span class="status-indicator ${statusClass}"></span>${d.situacao.toUpperCase()}</td>
    <td>
-    ${localStorage.getItem('logado') ? 
+    ${isLogado ? 
       `<button class="btn-danger" onclick="remover(${i})" style="margin-right:5px">X</button>
        ${!d.isEstagio ? `<button class="btn-purple" onclick="toggleEstagio(${i})" title="Mover para Estágios">🎓</button>` : `<button class="btn" onclick="toggleEstagio(${i})" title="Remover dos Estágios">📋</button>`}` 
       : '🔒'}
@@ -623,8 +670,8 @@ function render() {
   document.getElementById(tabelaId).appendChild(row);
  });
  
- // Verificar login
- if (localStorage.getItem('logado')) {
+ // Verificar login para mostrar/ocultar painel administrativo
+ if (isLogado) {
   document.getElementById('adminPanel').classList.remove('hidden');
   document.getElementById('loginBtn').classList.add('hidden');
   document.getElementById('logoutBtn').classList.remove('hidden');
