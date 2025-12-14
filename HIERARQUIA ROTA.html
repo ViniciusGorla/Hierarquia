@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Hierarquia PM - Administração</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+body {
+    background: #0b0f14;
+    color: #e5e7eb;
+    font-family: Arial, sans-serif;
+    margin: 0;
+}
+
+header {
+    padding: 15px;
+    background: #020617;
+    text-align: center;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.login-area {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.login-btn {
+    background: #2563eb;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.login-btn:hover {
+    background: #1d4ed8;
+}
+
+.logout-btn {
+    background: #dc2626;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.logout-btn:hover {
+    background: #b91c1c;
+}
+
+main {
+    padding: 20px;
+    max-width: 1500px;
+    margin: auto;
+}
+
+.card {
+    background: #020617;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #1e293b;
+    text-align: left;
+    font-size: 14px;
+}
+
+th {
+    background: #0f172a;
+    color: #93c5fd;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+}
+
+tr:hover {
+    background: #1e293b;
+}
+
+input, select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+    width: 100%;
+    margin-bottom: 10px;
+    background: #0f172a;
+    color: #e5e7eb;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+button {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.btn {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn:hover {
+    background: #1d4ed8;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #fff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.hidden {
+    display: none;
+}
+
+/* CORES POR CATEGORIA */
+.superior {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #020617;
+}
+
+.intermediario {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: #020617;
+}
+
+.subalterno {
+    background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+    color: #020617;
+}
+
+.especial {
+    background: linear-gradient(135deg, #7dd3fc 0%, #0ea5e9 100%);
+    color: #020617;
+}
+
+.graduado {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: #fff;
+}
+
+.praca {
+    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+    color: #020617;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: bold;
+    display: inline-block;
+    min-width: 120px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.ativo {
+    color: #22c55e;
+    font-weight: bold;
+}
+
+.ausente {
+    color: #facc15;
+    font-weight: bold;
+}
+
+.inativo {
+    color: #ef4444;
+    font-weight: bold;
+}
+
+/* Modal de Login */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    background: #020617;
+    margin: 15% auto;
+    padding: 25px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    border: 1px solid #334155;
+}
+
+.modal h2 {
+    margin-top: 0;
+    color: #93c5fd;
+}
+
+.close {
+    color: #94a3b8;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #e5e7eb;
+}
+
+/* Form grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #cbd5e1;
+    font-size: 0.9em;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        padding: 10px;
+        text-align: center;
+    }
+    
+    .login-area {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+    }
+    
+    table {
+        font-size: 12px;
+    }
+    
+    th, td {
+        padding: 8px 10px;
+    }
+    
+    .badge {
+        min-width: 90px;
+        font-size: 0.8em;
+    }
+}
+
+/* Status indicator */
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.status-ativo {
+    background: #22c55e;
+}
+
+.status-ausente {
+    background: #facc15;
+}
+
+.status-inativo {
+    background: #ef4444;
+}
+
+/* Highlight para novo registro */
+.novo-registro {
+    animation: highlight 2s ease-in-out;
+    background: rgba(34, 197, 94, 0.1) !important;
+}
+
+@keyframes highlight {
+    0% { background: rgba(34, 197, 94, 0.3); }
+    100% { background: rgba(34, 197, 94, 0.1); }
+}
+</style>
+</head>
+<body>
+<header>
+    <h1>Hierarquia Organizacional PM</h1>
+    <div class="login-area">
+        <button id="loginBtn" class="login-btn">Login Admin</button>
+        <button id="logoutBtn" class="logout-btn hidden">Sair</button>
+    </div>
+</header>
+
+<main>
+<!-- Modal de Login -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Login Administrador</h2>
+        <input type="password" id="senha" placeholder="Digite a senha de administrador" />
+        <button class="btn" id="btnEntrar">Entrar</button>
+    </div>
+</div>
+
+<!-- Painel Administrativo -->
+<div id="adminPanel" class="card hidden">
+    <h2>Painel Administrativo - Adicionar Integrante</h2>
+    <div class="form-grid">
+        <div class="form-group">
+            <label>CPF</label>
+            <input id="cpf" placeholder="000.000.000-00" />
+        </div>
+        <div class="form-group">
+            <label>Nome Completo</label>
+            <input id="nome" placeholder="Nome do integrante" />
+        </div>
+        <div class="form-group">
+            <label>Patente</label>
+            <select id="patente"></select>
+        </div>
+        <div class="form-group">
+            <label>Data de Entrada</label>
+            <input type="date" id="entrada" />
+        </div>
+        <div class="form-group">
+            <label>Última Promoção</label>
+            <input type="date" id="promocao" />
+        </div>
+        <div class="form-group">
+            <label>Serial</label>
+            <input id="serial" placeholder="Número de série" />
+        </div>
+        <div class="form-group">
+            <label>Função</label>
+            <input id="funcao" placeholder="Cargo/Função" />
+        </div>
+        <div class="form-group">
+            <label>Situação</label>
+            <select id="situacao">
+                <option value="ativo">Ativo</option>
+                <option value="ausente">Ausente</option>
+                <option value="inativo">Inativo</option>
+            </select>
+        </div>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 15px;">
+        <button class="btn" id="btnAdicionar">Adicionar Integrante</button>
+        <button class="btn-danger" id="btnLimpar">Limpar Campos</button>
+    </div>
+</div>
+
+<!-- Tabela de Integrantes -->
+<div class="card">
+    <h2>Lista de Integrantes</h2>
+    <div style="margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <div>Total de integrantes: <span id="totalIntegrantes">0</span></div>
+        <div id="filtroContainer" class="hidden">
+            <select id="filtroSituacao" style="width: auto;">
+                <option value="todos">Todos</option>
+                <option value="ativo">Ativos</option>
+                <option value="ausente">Ausentes</option>
+                <option value="inativo">Inativos</option>
+            </select>
+        </div>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>CPF</th>
+                <th>Nome</th>
+                <th>Graduação</th>
+                <th>Data Entrada</th>
+                <th>Última Promoção</th>
+                <th>Serial</th>
+                <th>Função</th>
+                <th>Situação</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="lista"></tbody>
+    </table>
+</div>
+</main>
+
+<script>
+const ADMIN_SENHA = 'ROTA123';
+
+const patentes = [
+    {n:'Tenente-Coronel PM ★★☆', o:1, c:'superior'},
+    {n:'Major PM ★☆☆', o:2, c:'superior'},
+    {n:'Capitão PM ☆☆☆', o:3, c:'intermediario'},
+    {n:'1º Tenente PM ✧✧', o:4, c:'subalterno'},
+    {n:'2º Tenente PM ✧', o:5, c:'subalterno'},
+    {n:'Aspirante a Oficial PM ★', o:6, c:'especial'},
+    {n:'Subtenente PM △', o:7, c:'graduado'},
+    {n:'1º Sargento PM ⟩⟩⟩ ⟩⟩', o:8, c:'graduado'},
+    {n:'2º Sargento PM ⟩⟩⟩ ⟩', o:9, c:'graduado'},
+    {n:'3º Sargento PM ⟩⟩⟩', o:10, c:'graduado'},
+    {n:'Cabo PM ⟩⟩', o:11, c:'praca'},
+    {n:'Soldado de 1º Classe PM ⟩', o:12, c:'praca'},
+    {n:'Soldado de 2º Classe PM', o:13, c:'praca'}
+];
+
+let dados = JSON.parse(localStorage.getItem('dados')) || [];
+let ultimoIdAdicionado = null;
+
+// Elementos DOM
+const elementos = {
+    loginBtn: document.getElementById('loginBtn'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    loginModal: document.getElementById('loginModal'),
+    adminPanel: document.getElementById('adminPanel'),
+    closeModal: document.querySelector('.close'),
+    btnEntrar: document.getElementById('btnEntrar'),
+    btnAdicionar: document.getElementById('btnAdicionar'),
+    btnLimpar: document.getElementById('btnLimpar'),
+    senhaInput: document.getElementById('senha'),
+    nomeInput: document.getElementById('nome'),
+    cpfInput: document.getElementById('cpf'),
+    patenteSelect: document.getElementById('patente'),
+    entradaInput: document.getElementById('entrada'),
+    promocaoInput: document.getElementById('promocao'),
+    serialInput: document.getElementById('serial'),
+    funcaoInput: document.getElementById('funcao'),
+    situacaoSelect: document.getElementById('situacao'),
+    listaTabela: document.getElementById('lista'),
+    totalIntegrantes: document.getElementById('totalIntegrantes'),
+    filtroContainer: document.getElementById('filtroContainer'),
+    filtroSituacao: document.getElementById('filtroSituacao')
+};
+
+// Inicializar o select de patentes
+patentes.forEach(p => {
+    const op = document.createElement('option');
+    op.value = p.n;
+    op.textContent = p.n;
+    elementos.patenteSelect.appendChild(op);
+});
+
+// Event Listeners
+elementos.loginBtn.addEventListener('click', openLoginModal);
+elementos.closeModal.addEventListener('click', closeLoginModal);
+elementos.logoutBtn.addEventListener('click', logout);
+elementos.btnEntrar.addEventListener('click', login);
+elementos.btnAdicionar.addEventListener('click', add);
+elementos.btnLimpar.addEventListener('click', limparForm);
+elementos.filtroSituacao.addEventListener('change', render);
+
+// Fechar modal ao clicar fora
+window.addEventListener('click', function(event) {
+    if (event.target === elementos.loginModal) {
+        closeLoginModal();
+    }
+});
+
+// Modal functions
+function openLoginModal() {
+    elementos.loginModal.style.display = 'block';
+    elementos.senhaInput.focus();
+}
+
+function closeLoginModal() {
+    elementos.loginModal.style.display = 'none';
+    elementos.senhaInput.value = '';
+}
+
+function login() {
+    const senha = elementos.senhaInput.value;
+    if (senha === ADMIN_SENHA) {
+        localStorage.setItem('logado', '1');
+        elementos.loginBtn.classList.add('hidden');
+        elementos.logoutBtn.classList.remove('hidden');
+        elementos.adminPanel.classList.remove('hidden');
+        elementos.filtroContainer.classList.remove('hidden');
+        closeLoginModal();
+        render();
+        alert('Login realizado com sucesso!');
+    } else {
+        alert('Senha incorreta! Tente novamente.');
+        elementos.senhaInput.value = '';
+        elementos.senhaInput.focus();
+    }
+}
+
+function logout() {
+    localStorage.removeItem('logado');
+    elementos.loginBtn.classList.remove('hidden');
+    elementos.logoutBtn.classList.add('hidden');
+    elementos.adminPanel.classList.add('hidden');
+    elementos.filtroContainer.classList.add('hidden');
+    render();
+    alert('Logout realizado!');
+}
+
+function limparForm() {
+    elementos.cpfInput.value = '';
+    elementos.nomeInput.value = '';
+    elementos.entradaInput.value = '';
+    elementos.promocaoInput.value = '';
+    elementos.serialInput.value = '';
+    elementos.funcaoInput.value = '';
+    elementos.situacaoSelect.value = 'ativo';
+    elementos.patenteSelect.selectedIndex = 0;
+    elementos.nomeInput.focus();
+}
+
+function add() {
+    const nomeV = elementos.nomeInput.value.trim();
+    const patV = elementos.patenteSelect.value;
+    
+    if (!nomeV) {
+        alert('Informe o nome do integrante');
+        elementos.nomeInput.focus();
+        return;
+    }
+    
+    if (!patV) {
+        alert('Selecione uma patente');
+        return;
+    }
+    
+    const pObj = patentes.find(p => p.n === patV);
+    
+    // Formatar data atual se não informada
+    const dataAtual = new Date().toISOString().split('T')[0];
+    
+    const novoIntegrante = {
+        id: Date.now(), // ID único para identificar o novo registro
+        cpf: elementos.cpfInput.value.trim() || 'Não informado',
+        nome: nomeV,
+        patente: patV,
+        ordem: pObj.o,
+        classe: pObj.c,
+        entrada: elementos.entradaInput.value || dataAtual,
+        promocao: elementos.promocaoInput.value || dataAtual,
+        serial: elementos.serialInput.value.trim() || 'Não informado',
+        funcao: elementos.funcaoInput.value.trim() || 'Não definida',
+        situacao: elementos.situacaoSelect.value
+    };
+    
+    // Adicionar ao array
+    dados.push(novoIntegrante);
+    
+    // Salvar no localStorage
+    localStorage.setItem('dados', JSON.stringify(dados));
+    
+    // Guardar o ID para highlight
+    ultimoIdAdicionado = novoIntegrante.id;
+    
+    // Limpar formulário
+    limparForm();
+    
+    // Atualizar a tabela
+    render();
+    
+    // Feedback
+    alert(`Integrante ${nomeV} adicionado com sucesso na patente ${patV}!`);
+}
+
+function remover(index) {
+    if (confirm('Tem certeza que deseja remover este integrante?')) {
+        const removido = dados[index].nome;
+        dados.splice(index, 1);
+        localStorage.setItem('dados', JSON.stringify(dados));
+        render();
+        alert(`Integrante ${removido} removido com sucesso!`);
+    }
+}
+
+function formatarData(data) {
+    if (!data) return '-';
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
+function render() {
+    const lista = elementos.listaTabela;
+    lista.innerHTML = '';
+    
+    // Filtrar dados se necessário
+    let dadosFiltrados = [...dados];
+    const filtro = elementos.filtroSituacao.value;
+    
+    if (filtro !== 'todos') {
+        dadosFiltrados = dados.filter(d => d.situacao === filtro);
+    }
+    
+    // Ordenar por hierarquia (ordem numérica)
+    dadosFiltrados.sort((a, b) => a.ordem - b.ordem);
+    
+    // Atualizar contador
+    elementos.totalIntegrantes.textContent = dados.length;
+    
+    if (dadosFiltrados.length === 0) {
+        lista.innerHTML = `<tr><td colspan="9" style="text-align: center; padding: 30px; color: #94a3b8;">
+            ${filtro === 'todos' ? 'Nenhum integrante cadastrado ainda.' : 'Nenhum integrante encontrado com este filtro.'}
+        </td></tr>`;
+        return;
+    }
+    
+    dadosFiltrados.forEach((d, i) => {
+        const linha = document.createElement('tr');
+        
+        // Adicionar classe para novo registro
+        if (d.id === ultimoIdAdicionado) {
+            linha.classList.add('novo-registro');
+            // Remover o highlight após 2 segundos
+            setTimeout(() => {
+                linha.classList.remove('novo-registro');
+            }, 2000);
+        }
+        
+        // Adicionar classe para linha baseada na situação
+        if (d.situacao === 'inativo') {
+            linha.style.opacity = '0.7';
+        }
+        
+        // Status indicator
+        let statusIcon = '';
+        if (d.situacao === 'ativo') statusIcon = '<span class="status-indicator status-ativo"></span>';
+        else if (d.situacao === 'ausente') statusIcon = '<span class="status-indicator status-ausente"></span>';
+        else statusIcon = '<span class="status-indicator status-inativo"></span>';
+        
+        // Botão de remover (apenas se logado)
+        let acaoBtn = '';
+        if (localStorage.getItem('logado')) {
+            // Encontrar o índice real no array original
+            const indexOriginal = dados.findIndex(item => item.id === d.id);
+            acaoBtn = `<button class='btn-danger' onclick='remover(${indexOriginal})' title='Remover integrante'>X</button>`;
+        } else {
+            acaoBtn = '<span style="color: #94a3b8; font-style: italic;">Login necessário</span>';
+        }
+        
+        linha.innerHTML = `
+            <td>${d.cpf}</td>
+            <td style="font-weight: 500;">${d.nome}</td>
+            <td><span class="badge ${d.classe}">${d.patente}</span></td>
+            <td>${formatarData(d.entrada)}</td>
+            <td>${formatarData(d.promocao)}</td>
+            <td>${d.serial}</td>
+            <td>${d.funcao}</td>
+            <td class="${d.situacao}">${statusIcon} ${d.situacao.toUpperCase()}</td>
+            <td>${acaoBtn}</td>
+        `;
+        
+        lista.appendChild(linha);
+    });
+    
+    // Resetar o último ID adicionado
+    if (ultimoIdAdicionado) {
+        setTimeout(() => {
+            ultimoIdAdicionado = null;
+        }, 3000);
+    }
+}
+
+// Verificar login ao carregar
+function init() {
+    // Configurar data atual nos campos de data
+    const hoje = new Date().toISOString().split('T')[0];
+    elementos.entradaInput.value = hoje;
+    elementos.promocaoInput.value = hoje;
+    
+    if (localStorage.getItem('logado')) {
+        elementos.loginBtn.classList.add('hidden');
+        elementos.logoutBtn.classList.remove('hidden');
+        elementos.adminPanel.classList.remove('hidden');
+        elementos.filtroContainer.classList.remove('hidden');
+    }
+    
+    render();
+}
+
+// Inicializar a aplicação
+init();
+</script>
+</body>
+</html>
