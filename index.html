@@ -83,7 +83,7 @@ tr:hover{background:#1a1a1a}
 </head>
 <body>
 <header>
-<h1>HIERARQUIA DE ROTA</h1>
+<h1>🔒 HIERARQUIA DE ROTA</h1>
 <button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
 <button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
@@ -486,10 +486,198 @@ function toggleEstagio(i) {
  integrante.isEstagio = !integrante.isEstagio;
  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
  render();
-
- const msg = integrante.isEstagio
-  ? '🎓 MARCADO COMO ESTAGIÁRIO'
-  : '📋 REMOVIDO DOS ESTÁGIOS';
-
- alert(`✅ ${integrante.nome} ${msg}`);
+ 
+ const acao = integrante.isEstagio ? 'marcado como ESTAGIÁRIO' : 'removido dos ESTÁGIOS';
+ alert(`${integrante.nome} ${acao}`);
 }
+
+function exportarDados() {
+ if (dados.length === 0) {
+  alert('NÃO HÁ DADOS PARA EXPORTAR');
+  return;
+ }
+ 
+ const dadosExportar = {
+  sistema: 'HIERARQUIA DE ROTA',
+  data: new Date().toISOString(),
+  total: dados.length,
+  integrantes: dados.map(d => ({
+   cpf: d.cpf,
+   nome: d.nome,
+   patente: d.patente,
+   funcao: d.funcao,
+   entrada: d.entrada,
+   situacao: d.situacao,
+   categoria: d.classe,
+   isEstagio: d.isEstagio || false
+  }))
+ };
+ 
+ const dataStr = JSON.stringify(dadosExportar, null, 2);
+ const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+ const fileName = `hierarquia-rota-${new Date().toISOString().split('T')[0]}.json`;
+ 
+ const link = document.createElement('a');
+ link.setAttribute('href', dataUri);
+ link.setAttribute('download', fileName);
+ link.click();
+ 
+ alert('✅ DADOS EXPORTADOS COM SUCESSO');
+}
+
+function render() {
+ // Ordenar por hierarquia
+ dados.sort((a, b) => a.ordem - b.ordem);
+ 
+ // Totais gerais
+ document.getElementById('totalGeral').textContent = dados.length;
+ 
+ // Contadores por categoria
+ const contadores = {
+  estagio: 0,
+  superior: 0,
+  intermediario: 0,
+  subalterno: 0,
+  especial: 0,
+  graduado: 0,
+  praca: 0
+ };
+ 
+ dados.forEach(d => {
+  // Contar por categoria real da patente
+  if (contadores[d.classe] !== undefined) {
+   contadores[d.classe]++;
+  }
+  // Contar estagiários separadamente
+  if (d.isEstagio) {
+   contadores.estagio++;
+  }
+ });
+ 
+ // Atualizar totais dos cards
+ document.getElementById('totalSuperiores').textContent = contadores.superior;
+ document.getElementById('totalIntermediarios').textContent = contadores.intermediario;
+ document.getElementById('totalSubalternos').textContent = contadores.subalterno;
+ document.getElementById('totalEspeciais').textContent = contadores.especial;
+ document.getElementById('totalGraduadas').textContent = contadores.graduado;
+ document.getElementById('totalPracas').textContent = contadores.praca;
+ document.getElementById('totalEstagios').textContent = contadores.estagio;
+ 
+ // Atualizar estatísticas
+ document.getElementById('stat-superior').textContent = contadores.superior;
+ document.getElementById('stat-intermediario').textContent = contadores.intermediario;
+ document.getElementById('stat-subalterno').textContent = contadores.subalterno;
+ document.getElementById('stat-especial').textContent = contadores.especial;
+ document.getElementById('stat-graduado').textContent = contadores.graduado;
+ document.getElementById('stat-praca').textContent = contadores.praca;
+ document.getElementById('stat-estagio').textContent = contadores.estagio;
+ 
+ // Limpar todas as tabelas
+ const tabelasIds = [
+  'lista-superiores',
+  'lista-intermediarios', 
+  'lista-subalternos',
+  'lista-especiais',
+  'lista-graduadas',
+  'lista-pracas',
+  'lista-estagios'
+ ];
+ 
+ tabelasIds.forEach(id => {
+  document.getElementById(id).innerHTML = '';
+ });
+ 
+ // Verificar se está logado
+ const isLogado = sessionStorage.getItem('logado') === '1';
+ 
+ // Preencher tabelas por categoria
+ dados.forEach((d, i) => {
+  const statusClass = d.situacao === 'ativo' ? 'status-ativo' : d.situacao === 'ausente' ? 'status-ausente' : 'status-inativo';
+  
+  const row = document.createElement('tr');
+  row.setAttribute('data-id', d.id);
+  
+  // Adicionar classe de highlight se for o último adicionado
+  if (d.id === ultimoIdAdicionado) {
+   row.classList.add('novo-registro');
+  }
+  
+  // Determinar a cor da badge (classe normal da patente)
+  const badgeClass = d.classe;
+  
+  // Determinar em qual tabela colocar
+  let tabelaId;
+  if (d.isEstagio) {
+   // Estagiários vão para a tabela especial
+   tabelaId = 'lista-estagios';
+  } else {
+   // Não estagiários vão para suas tabelas normais
+   switch(d.classe) {
+    case 'superior':
+     tabelaId = 'lista-superiores';
+     break;
+    case 'intermediario':
+     tabelaId = 'lista-intermediarios';
+     break;
+    case 'subalterno':
+     tabelaId = 'lista-subalternos';
+     break;
+    case 'especial':
+     tabelaId = 'lista-especiais';
+     break;
+    case 'graduado':
+     tabelaId = 'lista-graduadas';
+     break;
+    case 'praca':
+     tabelaId = 'lista-pracas';
+     break;
+    default:
+     tabelaId = 'lista-pracas';
+   }
+  }
+  
+  row.innerHTML = `
+   <td>${i+1}</td>
+   <td>${d.cpf}</td>
+   <td style="font-weight:bold">${d.nome}</td>
+   <td><span class="badge ${badgeClass}">${d.patente}</span></td>
+   <td>${d.funcao}</td>
+   <td>${d.entrada || '-'}</td>
+   <td class="${d.situacao}"><span class="status-indicator ${statusClass}"></span>${d.situacao.toUpperCase()}</td>
+   <td>
+    ${isLogado ? 
+      `<button class="btn-danger" onclick="remover(${i})" style="margin-right:5px">X</button>
+       ${!d.isEstagio ? `<button class="btn-purple" onclick="toggleEstagio(${i})" title="Mover para Estágios">🎓</button>` : `<button class="btn" onclick="toggleEstagio(${i})" title="Remover dos Estágios">📋</button>`}` 
+      : '🔒'}
+   </td>
+  `;
+  
+  document.getElementById(tabelaId).appendChild(row);
+ });
+ 
+ // Verificar login para mostrar/ocultar painel administrativo
+ if (isLogado) {
+  document.getElementById('adminPanel').classList.remove('hidden');
+  document.getElementById('loginBtn').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+ } else {
+  document.getElementById('adminPanel').classList.add('hidden');
+  document.getElementById('loginBtn').classList.remove('hidden');
+  document.getElementById('logoutBtn').classList.add('hidden');
+ }
+ 
+ // Remover highlight após 2 segundos
+ if (ultimoIdAdicionado) {
+  setTimeout(() => {
+   ultimoIdAdicionado = null;
+   const rows = document.querySelectorAll('.novo-registro');
+   rows.forEach(row => row.classList.remove('novo-registro'));
+  }, 2000);
+ }
+}
+
+// Inicializar
+init();
+</script>
+</body>
+</html>
