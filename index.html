@@ -7,7 +7,7 @@
 
 <style>
 body{background:#000;color:#f5f5f5;font-family:Arial;margin:0}
-header{background:#000;border-bottom:1px solid #333;padding:15px;text-align:center}
+header{background:#000;border-bottom:1px solid #333;padding:15px;text-align:center;position:relative}
 h1{margin:0;font-size:1.6rem}
 main{max-width:1500px;margin:auto;padding:20px}
 
@@ -16,179 +16,160 @@ main{max-width:1500px;margin:auto;padding:20px}
 button{padding:10px 16px;border-radius:6px;border:none;font-weight:bold;cursor:pointer}
 .btn{background:#fff;color:#000}
 .btn-danger{background:#444;color:#fff}
+.btn-success{background:#666;color:#fff}
+.btn-purple{background:#8b5cf6;color:#fff}
 
 input,select{background:#0f0f0f;color:#fff;border:1px solid #444;padding:10px;border-radius:6px;width:100%}
 
 table{width:100%;border-collapse:collapse;margin-top:15px}
-th,td{padding:10px;border-bottom:1px solid #333;font-size:14px}
+th,td{padding:12px;border-bottom:1px solid #333;font-size:14px}
 th{background:#111}
-tr:hover{background:#1a1a1a}
-
-.badge{padding:6px 12px;border-radius:999px;font-weight:bold;background:#fff;color:#000}
 
 .hidden{display:none}
 
-.ativo{color:#22c55e;font-weight:bold}
-.ausente{color:#facc15;font-weight:bold}
-.inativo{color:#ef4444;font-weight:bold}
+/* BADGES */
+.badge{padding:6px 12px;border-radius:999px;font-weight:bold;display:inline-block}
+.superior{background:#fff;color:#000}
+.intermediario{background:#22c55e;color:#000}
+.subalterno{background:#facc15;color:#000}
+.especial{background:#3b82f6;color:#fff}
+.graduado{background:#ef4444;color:#fff}
+.praca{background:#9ca3af;color:#000}
 
-.status-indicator{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
-.status-ativo{background:#22c55e}
-.status-ausente{background:#facc15}
-.status-inativo{background:#ef4444}
+/* STATUS */
+.status-ativo{color:#22c55e}
+.status-ausente{color:#facc15}
+.status-inativo{color:#ef4444}
 
 /* MODAL */
-.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center}
-.modal-content{background:#0a0a0a;border:1px solid #333;padding:25px;border-radius:10px;width:320px;text-align:center}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8)}
+.modal-content{background:#000;margin:15% auto;padding:30px;border-radius:10px;max-width:400px}
+.close{float:right;font-size:26px;cursor:pointer}
+
+/* TOTALS */
+.totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+.total-card{background:#111;padding:15px;border-radius:8px;text-align:center}
+.total-card .numero{font-size:28px;font-weight:bold}
+
+.categoria-header{background:#111;padding:10px;margin-top:20px;font-weight:bold}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🔒 HIERARQUIA DE ROTA</h1>
-<button class="btn" onclick="abrirLogin()">🔑 Acesso Administrativo</button>
-<button id="logoutBtn" class="btn-danger hidden" onclick="logout()">🚪 Sair</button>
+<h1>HIERARQUIA DE ROTA</h1>
+<button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
+<button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
 
 <main>
 
+<!-- RESUMO -->
 <div class="card">
-<h2>📊 Total Geral do Efetivo</h2>
-<p style="font-size:32px;font-weight:bold" id="totalGeral">0</p>
+<h2>📊 RESUMO GERAL</h2>
+<div class="totals-grid">
+<div class="total-card"><h3>Total</h3><div id="totalGeral" class="numero">0</div></div>
+<div class="total-card"><h3>Superiores</h3><div id="totalSuperiores" class="numero">0</div></div>
+<div class="total-card"><h3>Intermediários</h3><div id="totalIntermediarios" class="numero">0</div></div>
+<div class="total-card"><h3>Subalternos</h3><div id="totalSubalternos" class="numero">0</div></div>
+<div class="total-card"><h3>Praças</h3><div id="totalPracas" class="numero">0</div></div>
+</div>
 </div>
 
+<!-- LOGIN -->
+<div id="loginModal" class="modal">
+<div class="modal-content">
+<span class="close" onclick="closeLoginModal()">×</span>
+<h2>🔐 Login Administrativo</h2>
+<input type="password" id="senha" placeholder="Senha" />
+<button class="btn" onclick="login()" style="width:100%">Entrar</button>
+</div>
+</div>
+
+<!-- ADMIN -->
 <div id="adminPanel" class="card hidden">
-<h2>👥 Controle de Integrantes</h2>
-
-<input id="nome" placeholder="Nome completo">
-<br><br>
-
+<h2>👮 Painel Administrativo</h2>
+<input id="nome" placeholder="Nome completo" />
 <select id="patente"></select>
-<br><br>
-
-<input type="date" id="entrada">
-<br><br>
-
-<select id="situacao">
-<option value="ativo">Ativo</option>
-<option value="ausente">Ausente</option>
-<option value="inativo">Inativo</option>
-</select>
-<br><br>
-
-<button class="btn" onclick="add()">Adicionar Integrante</button>
+<button class="btn-success" onclick="add()">Adicionar</button>
 </div>
 
+<!-- LISTA -->
+<div class="categoria-header">EFETIVO</div>
 <div class="card">
-<h2>📋 Relação de Integrantes</h2>
 <table>
 <thead>
 <tr>
-<th>#</th><th>Nome</th><th>Patente</th><th>Entrada</th><th>Situação</th><th>Ação</th>
+<th>#</th>
+<th>Nome</th>
+<th>Patente</th>
+<th>Status</th>
+<th>Ação</th>
 </tr>
 </thead>
 <tbody id="lista"></tbody>
 </table>
 </div>
 
-<div class="card">
-<h2>📌 Distribuição por Categoria</h2>
-<ul id="estatisticas" style="line-height:2"></ul>
-</div>
-
 </main>
-
-<!-- MODAL LOGIN -->
-<div id="loginModal" class="modal hidden">
-<div class="modal-content">
-<h3>🔐 ACESSO RESTRITO</h3>
-<input type="password" id="senha" placeholder="Senha administrativa">
-<br><br>
-<button class="btn" type="button" onclick="login()">Entrar</button>
-<br><br>
-<button class="btn-danger" onclick="fecharLogin()">Cancelar</button>
-</div>
-</div>
 
 <script>
 const patentes = [
- {n:'Tenente-Coronel PM',o:1,c:'superior'},
- {n:'Major PM',o:2,c:'superior'},
- {n:'Capitão PM',o:3,c:'intermediario'},
- {n:'1º Tenente PM',o:4,c:'subalterno'},
- {n:'2º Tenente PM',o:5,c:'subalterno'},
- {n:'Aspirante PM',o:6,c:'especial'},
- {n:'Subtenente PM',o:7,c:'graduado'},
- {n:'1º Sargento PM',o:8,c:'graduado'},
- {n:'2º Sargento PM',o:9,c:'graduado'},
- {n:'3º Sargento PM',o:10,c:'graduado'},
- {n:'Cabo PM',o:11,c:'praca'},
- {n:'Soldado PM',o:12,c:'praca'}
+ {n:'TENENTE-CORONEL',c:'superior'},
+ {n:'MAJOR',c:'superior'},
+ {n:'CAPITÃO',c:'intermediario'},
+ {n:'TENENTE',c:'subalterno'},
+ {n:'SARGENTO',c:'graduado'},
+ {n:'SOLDADO',c:'praca'}
 ];
 
 let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
 
-function abrirLogin(){document.getElementById('loginModal').classList.remove('hidden')}
-function fecharLogin(){document.getElementById('loginModal').classList.add('hidden')}
-
-async function login(){
- const senha=document.getElementById('senha').value;
- if(!senha)return alert('Digite a senha');
-
- const res = await fetch('/api/login',{
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body:JSON.stringify({senha})
- });
-
- if(res.ok){
-  sessionStorage.setItem('admin','1');
-  document.getElementById('adminPanel').classList.remove('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
-  fecharLogin();
- } else {
-  alert('Senha incorreta');
- }
-}
-
-function logout(){
- sessionStorage.removeItem('admin');
- location.reload();
-}
-
 function init(){
- const sel=document.getElementById('patente');
- sel.innerHTML='<option value="">Selecione</option>';
+ const sel = document.getElementById('patente');
  patentes.forEach(p=>{
   const o=document.createElement('option');
   o.value=p.n;o.textContent=p.n;
   sel.appendChild(o);
  });
- if(sessionStorage.getItem('admin')){
-  document.getElementById('adminPanel').classList.remove('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
- }
+ render();
+}
+
+function openLoginModal(){
+ document.getElementById('loginModal').style.display='block';
+}
+function closeLoginModal(){
+ document.getElementById('loginModal').style.display='none';
+}
+
+async function login(){
+ const senha=document.getElementById('senha').value;
+ const res=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({senha})});
+ if(res.ok){
+  sessionStorage.setItem('logado','1');
+  render();
+  closeLoginModal();
+ } else alert('Senha incorreta');
+}
+
+function logout(){
+ sessionStorage.removeItem('logado');
  render();
 }
 
 function add(){
- const nome=document.getElementById('nome').value.trim();
+ const nome=document.getElementById('nome').value;
  const pat=document.getElementById('patente').value;
- if(!nome||!pat)return alert('Preencha os campos');
+ if(!nome||!pat) return alert('Preencha tudo');
  const pObj=patentes.find(p=>p.n===pat);
- dados.push({
-  id:Date.now(),nome,
-  patente:pat,ordem:pObj.o,classe:pObj.c,
-  entrada:document.getElementById('entrada').value,
-  situacao:document.getElementById('situacao').value
- });
+ dados.push({nome,patente:pat,classe:pObj.c,status:'ativo'});
  localStorage.setItem('hierarquia_rota',JSON.stringify(dados));
  render();
 }
 
 function remover(i){
- if(confirm('Remover integrante?')){
+ if(confirm('Remover?')){
   dados.splice(i,1);
   localStorage.setItem('hierarquia_rota',JSON.stringify(dados));
   render();
@@ -196,37 +177,34 @@ function remover(i){
 }
 
 function render(){
- dados.sort((a,b)=>a.ordem-b.ordem);
- document.getElementById('totalGeral').textContent=dados.length;
- const lista=document.getElementById('lista');
- lista.innerHTML='';
- const cont={praca:0,graduado:0,especial:0,subalterno:0,intermediario:0,superior:0};
+ const tbody=document.getElementById('lista');
+ tbody.innerHTML='';
+ const isLogado=sessionStorage.getItem('logado')==='1';
+
+ document.getElementById('adminPanel').classList.toggle('hidden',!isLogado);
+ document.getElementById('loginBtn').classList.toggle('hidden',isLogado);
+ document.getElementById('logoutBtn').classList.toggle('hidden',!isLogado);
 
  dados.forEach((d,i)=>{
-  cont[d.classe]++;
-  const st=d.situacao==='ativo'?'status-ativo':d.situacao==='ausente'?'status-ausente':'status-inativo';
-  lista.innerHTML+=`
-  <tr>
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
    <td>${i+1}</td>
    <td>${d.nome}</td>
-   <td><span class="badge">${d.patente}</span></td>
-   <td>${d.entrada||'-'}</td>
-   <td class="${d.situacao}">
-    <span class="status-indicator ${st}"></span>${d.situacao.toUpperCase()}
-   </td>
-   <td><button class="btn-danger" onclick="remover(${i})">X</button></td>
-  </tr>`;
+   <td><span class="badge ${d.classe}">${d.patente}</span></td>
+   <td class="status-${d.status}">${d.status}</td>
+   <td>
+    ${isLogado
+      ? `<button class="btn-danger" onclick="remover(${i})">🗑️</button>`
+      : `<span style="color:#777">Somente admin</span>`}
+   </td>`;
+  tbody.appendChild(tr);
  });
 
- document.getElementById('estatisticas').innerHTML=`
- <li>Praças: ${cont.praca}</li>
- <li>Praças Graduadas: ${cont.graduado}</li>
- <li>Praças Especiais: ${cont.especial}</li>
- <li>Oficiais Subalternos: ${cont.subalterno}</li>
- <li>Oficiais Intermediários: ${cont.intermediario}</li>
- <li>Oficiais Superiores: ${cont.superior}</li>`;
+ document.getElementById('totalGeral').textContent=dados.length;
 }
 
+document.getElementById('loginBtn').onclick=openLoginModal;
+document.getElementById('logoutBtn').onclick=logout;
 init();
 </script>
 
