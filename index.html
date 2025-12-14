@@ -21,6 +21,10 @@ button{padding:10px 16px;border-radius:6px;border:none;font-weight:bold;cursor:p
 .btn-success:hover{background:#777}
 .btn-purple{background:#8b5cf6;color:#fff}
 .btn-purple:hover{background:#7c3aed}
+.btn-promover{background:#f59e0b;color:#000}
+.btn-promover:hover{background:#d97706}
+.btn-rebaixar{background:#6b7280;color:#fff}
+.btn-rebaixar:hover{background:#4b5563}
 
 input,select{background:#0f0f0f;color:#fff;border:1px solid #444;padding:10px;border-radius:6px;width:100%;margin-bottom:10px;box-sizing:border-box}
 input:focus,select:focus{outline:none;border-color:#888}
@@ -38,6 +42,7 @@ tr:hover{background:#1a1a1a}
 .especial{background:#3b82f6;color:#ffffff !important;border:1px solid #1e40af} /* AZUL */
 .graduado{background:#ef4444;color:#ffffff !important;border:1px solid #991b1b} /* VERMELHO */
 .praca{background:#9ca3af;color:#000000 !important;border:1px solid #6b7280} /* CINZA */
+.estagio{background:#a855f7;color:#ffffff !important;border:1px solid #7c3aed} /* ROXO - ESTÁGIOS */
 
 .hidden{display:none}
 
@@ -79,6 +84,13 @@ tr:hover{background:#1a1a1a}
 /* CHECKBOX ESTÁGIO */
 .checkbox-container{display:flex;align-items:center;gap:10px;margin-top:10px}
 .checkbox-container input[type="checkbox"]{width:20px;height:20px;margin:0}
+
+/* AÇÕES */
+.acoes-container{display:flex;gap:5px;flex-wrap:wrap}
+.acoes-container button{padding:6px 10px;font-size:12px}
+
+/* CONTADOR DE ESTÁGIOS */
+.contador-estagio{display:inline-block;background:#a855f7;color:white;padding:3px 8px;border-radius:12px;font-size:12px;margin-left:5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -122,7 +134,7 @@ tr:hover{background:#1a1a1a}
 <div class="numero" id="totalPracas">0</div>
 </div>
 <div class="total-card estagio">
-<h3>Estagiários</h3>
+<h3>Estagiários <span class="contador-estagio" id="contadorEstagio">0</span></h3>
 <div class="numero" id="totalEstagios">0</div>
 </div>
 </div>
@@ -147,6 +159,7 @@ tr:hover{background:#1a1a1a}
 <div><label>PATENTE *</label><select id="patente"></select></div>
 <div><label>FUNÇÃO</label><input id="funcao" placeholder="Cargo/Função" /></div>
 <div><label>DATA DE ENTRADA</label><input type="date" id="entrada" /></div>
+<div><label>ÚLTIMA PROMOÇÃO</label><input type="date" id="promocao" /></div>
 <div><label>SITUAÇÃO</label><select id="situacao">
 <option value="ativo">ATIVO</option>
 <option value="ausente">AUSENTE</option>
@@ -160,13 +173,12 @@ tr:hover{background:#1a1a1a}
 <label for="estagio" style="font-weight:bold;color:#a855f7">🎓 MARCAR COMO ESTAGIÁRIO</label>
 </div>
 <div style="margin:10px 0;padding:10px;background:#1a1a1a;border-radius:6px;border-left:4px solid #a855f7">
-<small style="color:#d8b4fe;">ℹ️ Estagiários aparecem na categoria especial "ESTÁGIOS" abaixo de Praças, mantendo a cor normal da patente.</small>
+<small style="color:#d8b4fe;">ℹ️ Estagiários aparecem na categoria especial "ESTÁGIOS" abaixo de Praças.</small>
 </div>
 
 <br>
 <button class="btn" onclick="add()">✅ ADICIONAR INTEGRANTE</button>
 <button class="btn-success" onclick="exportarDados()" style="margin-left:10px">📥 EXPORTAR DADOS</button>
-<button class="btn-purple" onclick="moverParaEstagio()" style="margin-left:10px" id="btnMoverEstagio">🔄 MARCAR COMO ESTAGIÁRIO</button>
 <button class="btn-danger" onclick="limparForm()" style="margin-left:10px">🗑️ LIMPAR FORMULÁRIO</button>
 </div>
 
@@ -176,7 +188,15 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-superiores"></tbody>
 </table>
@@ -189,7 +209,15 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-intermediarios"></tbody>
 </table>
@@ -202,7 +230,15 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-subalternos"></tbody>
 </table>
@@ -215,7 +251,15 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-especiais"></tbody>
 </table>
@@ -228,7 +272,15 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-graduadas"></tbody>
 </table>
@@ -241,43 +293,46 @@ tr:hover{background:#1a1a1a}
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-pracas"></tbody>
 </table>
 </div>
 </div>
 
-<!-- CATEGORIA: ESTÁGIOS (AGORA ABAIXO DE PRAÇAS) -->
+<!-- CATEGORIA: ESTÁGIOS -->
 <div class="categoria-container">
 <div class="categoria-header" style="border-left-color:#a855f7">🎓 ESTÁGIOS</div>
 <div class="card">
 <table>
 <thead>
-<tr><th>#</th><th>CPF</th><th>NOME</th><th>PATENTE</th><th>FUNÇÃO</th><th>ENTRADA</th><th>SITUAÇÃO</th><th>AÇÃO</th></tr>
+<tr>
+<th>NOME</th>
+<th>PATENTE</th>
+<th>FUNÇÃO</th>
+<th>ENTRADA</th>
+<th>ÚLTIMA PROMOÇÃO</th>
+<th>SITUAÇÃO</th>
+<th>AÇÃO</th>
+</tr>
 </thead>
 <tbody id="lista-estagios"></tbody>
 </table>
 </div>
 </div>
 
-<!-- ESTATÍSTICAS -->
-<div class="card">
-<h2>📌 DISTRIBUIÇÃO POR CATEGORIA</h2>
-<ul id="estatisticas" style="line-height:2;list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUPERIORES: <span id="stat-superior" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS INTERMEDIÁRIOS: <span id="stat-intermediario" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUBALTERNOS: <span id="stat-subalterno" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS ESPECIAIS: <span id="stat-especial" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS GRADUADAS: <span id="stat-graduado" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS: <span id="stat-praca" style="float:right;font-weight:bold">0</span></li>
-<li style="background:#111;padding:10px;border-radius:6px;border-left:4px solid #a855f7">ESTÁGIOS: <span id="stat-estagio" style="float:right;font-weight:bold;color:#a855f7">0</span></li>
-</ul>
-</div>
 </main>
 
 <script>
-// PATENTES COM SÍMBOLOS - SEPARADO POR CATEGORIA CORRETA
+// PATENTES COM SÍMBOLOS - ORDENADAS POR HIERARQUIA
 const patentes = [
  // OFICIAIS SUPERIORES - BRANCO
  {n:'TENENTE-CORONEL PM ★★☆', o:1, c:'superior'},
@@ -317,9 +372,10 @@ function init(){
   sel.appendChild(o);
  });
  
- // Configurar data atual
+ // Configurar datas atuais
  const hoje = new Date().toISOString().split('T')[0];
  document.getElementById('entrada').value = hoje;
+ document.getElementById('promocao').value = hoje;
  
  // Event listeners
  document.getElementById('loginBtn').onclick = openLoginModal;
@@ -417,7 +473,9 @@ function limparForm() {
  document.getElementById('cpf').value = '';
  document.getElementById('nome').value = '';
  document.getElementById('funcao').value = '';
- document.getElementById('entrada').value = new Date().toISOString().split('T')[0];
+ const hoje = new Date().toISOString().split('T')[0];
+ document.getElementById('entrada').value = hoje;
+ document.getElementById('promocao').value = hoje;
  document.getElementById('situacao').value = 'ativo';
  document.getElementById('patente').value = '';
  document.getElementById('estagio').checked = false;
@@ -451,6 +509,7 @@ function add() {
   ordem: pObj.o,
   classe: pObj.c, // Mantém a classe original da patente
   entrada: document.getElementById('entrada').value,
+  promocao: document.getElementById('promocao').value || new Date().toISOString().split('T')[0],
   situacao: document.getElementById('situacao').value,
   dataCadastro: new Date().toISOString(),
   isEstagio: isEstagio // Flag para identificar estagiário
@@ -491,6 +550,46 @@ function toggleEstagio(i) {
  alert(`${integrante.nome} ${acao}`);
 }
 
+// PROMOVER um integrante
+function promover(i) {
+ const integrante = dados[i];
+ const indexAtual = patentes.findIndex(p => p.n === integrante.patente);
+ 
+ if (indexAtual > 0) { // Não pode promover além do topo
+  const novaPatente = patentes[indexAtual - 1];
+  integrante.patente = novaPatente.n;
+  integrante.ordem = novaPatente.o;
+  integrante.classe = novaPatente.c;
+  integrante.promocao = new Date().toISOString().split('T')[0];
+  
+  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+  render();
+  alert(`✅ ${integrante.nome} PROMOVIDO para ${novaPatente.n}`);
+ } else {
+  alert('⚠️ Este já é o mais alto posto!');
+ }
+}
+
+// REBAIXAR um integrante
+function rebaixar(i) {
+ const integrante = dados[i];
+ const indexAtual = patentes.findIndex(p => p.n === integrante.patente);
+ 
+ if (indexAtual < patentes.length - 1) { // Não pode rebaixar além do último
+  const novaPatente = patentes[indexAtual + 1];
+  integrante.patente = novaPatente.n;
+  integrante.ordem = novaPatente.o;
+  integrante.classe = novaPatente.c;
+  integrante.promocao = new Date().toISOString().split('T')[0];
+  
+  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+  render();
+  alert(`⚠️ ${integrante.nome} REBAIXADO para ${novaPatente.n}`);
+ } else {
+  alert('⚠️ Este já é o posto mais baixo!');
+ }
+}
+
 function exportarDados() {
  if (dados.length === 0) {
   alert('NÃO HÁ DADOS PARA EXPORTAR');
@@ -507,6 +606,7 @@ function exportarDados() {
    patente: d.patente,
    funcao: d.funcao,
    entrada: d.entrada,
+   promocao: d.promocao,
    situacao: d.situacao,
    categoria: d.classe,
    isEstagio: d.isEstagio || false
@@ -562,15 +662,7 @@ function render() {
  document.getElementById('totalGraduadas').textContent = contadores.graduado;
  document.getElementById('totalPracas').textContent = contadores.praca;
  document.getElementById('totalEstagios').textContent = contadores.estagio;
- 
- // Atualizar estatísticas
- document.getElementById('stat-superior').textContent = contadores.superior;
- document.getElementById('stat-intermediario').textContent = contadores.intermediario;
- document.getElementById('stat-subalterno').textContent = contadores.subalterno;
- document.getElementById('stat-especial').textContent = contadores.especial;
- document.getElementById('stat-graduado').textContent = contadores.graduado;
- document.getElementById('stat-praca').textContent = contadores.praca;
- document.getElementById('stat-estagio').textContent = contadores.estagio;
+ document.getElementById('contadorEstagio').textContent = contadores.estagio;
  
  // Limpar todas as tabelas
  const tabelasIds = [
@@ -602,8 +694,9 @@ function render() {
    row.classList.add('novo-registro');
   }
   
-  // Determinar a cor da badge (classe normal da patente)
-  const badgeClass = d.classe;
+  // Determinar a cor da badge
+  // Estagiários usam badge ROXO, outros mantêm a cor normal
+  const badgeClass = d.isEstagio ? 'estagio' : d.classe;
   
   // Determinar em qual tabela colocar
   let tabelaId;
@@ -636,19 +729,27 @@ function render() {
    }
   }
   
+  // Verificar se pode promover/rebaixar
+  const indexAtual = patentes.findIndex(p => p.n === d.patente);
+  const podePromover = indexAtual > 0;
+  const podeRebaixar = indexAtual < patentes.length - 1;
+  
   row.innerHTML = `
-   <td>${i+1}</td>
-   <td>${d.cpf}</td>
    <td style="font-weight:bold">${d.nome}</td>
    <td><span class="badge ${badgeClass}">${d.patente}</span></td>
    <td>${d.funcao}</td>
    <td>${d.entrada || '-'}</td>
+   <td>${d.promocao || '-'}</td>
    <td class="${d.situacao}"><span class="status-indicator ${statusClass}"></span>${d.situacao.toUpperCase()}</td>
    <td>
+    <div class="acoes-container">
     ${isLogado ? 
-      `<button class="btn-danger" onclick="remover(${i})" style="margin-right:5px">X</button>
+      `<button class="btn-danger" onclick="remover(${i})" title="Remover">🗑️</button>
+       ${podePromover ? `<button class="btn-promover" onclick="promover(${i})" title="Promover">⬆️</button>` : ''}
+       ${podeRebaixar ? `<button class="btn-rebaixar" onclick="rebaixar(${i})" title="Rebaixar">⬇️</button>` : ''}
        ${!d.isEstagio ? `<button class="btn-purple" onclick="toggleEstagio(${i})" title="Mover para Estágios">🎓</button>` : `<button class="btn" onclick="toggleEstagio(${i})" title="Remover dos Estágios">📋</button>`}` 
       : '🔒'}
+    </div>
    </td>
   `;
   
