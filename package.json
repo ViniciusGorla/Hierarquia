@@ -3,14 +3,11 @@
   "version": "1.0.0",
   "description": "Sistema de hierarquia da Polícia Militar",
   "scripts": {
-    "start": "serve -s .",
-    "build": "echo 'Build completo'"
+    "dev": "echo 'Servidor de desenvolvimento'",
+    "build": "echo 'Build de site estático'",
+    "start": "echo 'Iniciando servidor'"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "serve": "^14.0.0"
-  },
-  "engines": {
-    "node": ">=18"
-  }
+  "keywords": ["hierarquia", "pm", "polícia", "administração"],
+  "author": "",
+  "license": "MIT"
 }
