@@ -1,8 +1,4 @@
 {
   "name": "hierarquia-rota",
-  "version": "1.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "echo 'Dev server'"
-  }
+  "version": "1.0.0"
 }
