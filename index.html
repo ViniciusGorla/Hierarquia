@@ -30,7 +30,7 @@ th,td{padding:12px;border-bottom:1px solid #333;text-align:left;font-size:14px}
 th{background:#111}
 tr:hover{background:#1a1a1a}
 
-/* CORES DAS PATENTES*/
+/* CORES DAS PATENTES CONFORME SOLICITADO */
 .badge{padding:6px 12px;border-radius:999px;font-weight:bold;border:1px solid #000;display:inline-block;min-width:180px;text-align:center}
 .superior{background:#ffffff;color:#000000 !important;border:1px solid #aaa} /* BRANCO */
 .intermediario{background:#22c55e;color:#000000 !important;border:1px solid #166534} /* VERDE */
@@ -80,9 +80,6 @@ tr:hover{background:#1a1a1a}
 .checkbox-container{display:flex;align-items:center;gap:10px;margin-top:10px}
 .checkbox-container input[type="checkbox"]{width:20px;height:20px;margin:0}
 
-/* ÍCONE DE ESTÁGIO */
-.estagio-icon{color:#a855f7;margin-left:5px}
-
 /* LOADING SPINNER */
 .spinner {
   border: 3px solid rgba(255, 255, 255, 0.3);
@@ -100,11 +97,24 @@ tr:hover{background:#1a1a1a}
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* DEBUG INFO */
+.debug-info {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: rgba(0,0,0,0.8);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  z-index: 9999;
+}
 </style>
 </head>
 <body>
 <header>
-<h1> HIERARQUIA DE ROTA</h1>
+<h1>🔒 HIERARQUIA DE ROTA</h1>
 <button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
 <button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
@@ -159,6 +169,7 @@ tr:hover{background:#1a1a1a}
 <span id="spinner" class="hidden"></span>
 <span id="btnText">VERIFICAR CREDENCIAIS</span>
 </button>
+<div id="debugInfo" style="margin-top:10px;color:#888;font-size:11px;display:none"></div>
 </div>
 </div>
 
@@ -285,38 +296,43 @@ tr:hover{background:#1a1a1a}
 </div>
 </div>
 
+<!-- ESTATÍSTICAS -->
+<div class="card">
+<h2>📌 DISTRIBUIÇÃO POR CATEGORIA</h2>
+<ul id="estatisticas" style="line-height:2;list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:10px">
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUPERIORES: <span id="stat-superior" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS INTERMEDIÁRIOS: <span id="stat-intermediario" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">OFICIAIS SUBALTERNOS: <span id="stat-subalterno" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS ESPECIAIS: <span id="stat-especial" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS GRADUADAS: <span id="stat-graduado" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px">PRAÇAS: <span id="stat-praca" style="float:right;font-weight:bold">0</span></li>
+<li style="background:#111;padding:10px;border-radius:6px;border-left:4px solid #a855f7">ESTÁGIOS: <span id="stat-estagio" style="float:right;font-weight:bold;color:#a855f7">0</span></li>
+</ul>
+</div>
+</main>
 
+<div id="debugConsole" class="debug-info hidden">Debug: OFF</div>
 
 <script>
-// PATENTES COM SÍMBOLOS - SEPARADO POR CATEGORIA CORRETA
+// PATENTES COM SÍMBOLOS
 const patentes = [
- // OFICIAIS SUPERIORES - BRANCO
  {n:'TENENTE-CORONEL PM ★★☆', o:1, c:'superior'},
  {n:'MAJOR PM ★☆☆', o:2, c:'superior'},
- 
- // OFICIAIS INTERMEDIÁRIOS - VERDE
  {n:'CAPITÃO PM ☆☆☆', o:3, c:'intermediario'},
- 
- // OFICIAIS SUBALTERNOS - AMARELO
  {n:'1º TENENTE PM ✧✧', o:4, c:'subalterno'},
  {n:'2º TENENTE PM ✧', o:5, c:'subalterno'},
- 
- // PRAÇAS ESPECIAIS - AZUL
  {n:'ASPIRANTE PM ★', o:6, c:'especial'},
- 
- // PRAÇAS GRADUADAS - VERMELHO
  {n:'SUBTENENTE PM △', o:7, c:'graduado'},
  {n:'1º SARGENTO PM ⟩⟩⟩ ⟩⟩', o:8, c:'graduado'},
  {n:'2º SARGENTO PM ⟩⟩⟩ ⟩', o:9, c:'graduado'},
  {n:'3º SARGENTO PM ⟩⟩⟩', o:10, c:'graduado'},
- 
- // PRAÇAS - CINZA
  {n:'CABO PM ⟩⟩', o:11, c:'praca'},
  {n:'SOLDADO PM ⟩', o:12, c:'praca'}
 ];
 
 let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
 let ultimoIdAdicionado = null;
+const DEBUG_MODE = true; // Ativar modo debug
 
 function init(){
  const sel = document.getElementById('patente');
@@ -351,18 +367,48 @@ function init(){
   if (e.key === 'Enter') login();
  });
  
+ // Mostrar debug console se estiver ativo
+ if (DEBUG_MODE) {
+  document.getElementById('debugConsole').classList.remove('hidden');
+  document.getElementById('debugInfo').style.display = 'block';
+ }
+ 
+ // Verificar se já está logado
+ checkLoginStatus();
+ 
  render();
 }
 
+function updateDebugInfo(message) {
+ if (DEBUG_MODE) {
+  const debugDiv = document.getElementById('debugConsole');
+  debugDiv.textContent = `Debug: ${message}`;
+  console.log(message);
+ }
+}
+
+async function checkLoginStatus() {
+ // Verificar sessionStorage
+ if (sessionStorage.getItem('logado') === '1') {
+  updateDebugInfo('Usuário já logado via sessionStorage');
+  document.getElementById('adminPanel').classList.remove('hidden');
+  document.getElementById('loginBtn').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  return true;
+ }
+ return false;
+}
+
 function openLoginModal() {
+ updateDebugInfo('Abrindo modal de login');
  document.getElementById('loginModal').style.display = 'block';
  document.getElementById('senha').focus();
 }
 
 function closeLoginModal() {
+ updateDebugInfo('Fechando modal de login');
  document.getElementById('loginModal').style.display = 'none';
  document.getElementById('senha').value = '';
- // Resetar estado do botão
  const spinner = document.getElementById('spinner');
  const btnText = document.getElementById('btnText');
  spinner.classList.add('hidden');
@@ -381,45 +427,107 @@ async function login() {
  // Mostrar loading
  const spinner = document.getElementById('spinner');
  const btnText = document.getElementById('btnText');
+ const btnEntrar = document.getElementById('btnEntrar');
+ const debugInfo = document.getElementById('debugInfo');
+ 
  spinner.classList.remove('hidden');
  spinner.innerHTML = '<div class="spinner"></div>';
  btnText.textContent = 'VERIFICANDO...';
+ btnEntrar.disabled = true;
  
+ // TEMPORÁRIO: Senha local para teste enquanto a API não funciona
+ // REMOVA ISSO QUANDO A API ESTIVER FUNCIONANDO!
+ const SENHA_TEMPORARIA = 'R0TA@Adm#2025!';
+ 
+ if (senha === SENHA_TEMPORARIA) {
+  updateDebugInfo('Login bem-sucedido (modo temporário)');
+  sessionStorage.setItem('logado', '1');
+  
+  document.getElementById('adminPanel').classList.remove('hidden');
+  document.getElementById('loginBtn').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+  
+  closeLoginModal();
+  alert('ACESSO ADMINISTRATIVO CONCEDIDO');
+  
+  // Resetar estado
+  spinner.classList.add('hidden');
+  spinner.innerHTML = '';
+  btnText.textContent = 'VERIFICAR CREDENCIAIS';
+  btnEntrar.disabled = false;
+  return;
+ }
+ 
+ // TENTATIVA COM API (comente as linhas acima quando a API funcionar)
  try {
-  const res = await fetch('/api/login', {
+  updateDebugInfo('Tentando conectar com API...');
+  
+  // URL absoluta para evitar problemas de rota
+  const apiUrl = window.location.origin + '/api/login';
+  updateDebugInfo(`API URL: ${apiUrl}`);
+  
+  // Adicionar timestamp para evitar cache
+  const timestamp = Date.now();
+  const urlWithCacheBuster = `${apiUrl}?_=${timestamp}`;
+  
+  const response = await fetch(urlWithCacheBuster, {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify({ senha })
+   headers: { 
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0'
+   },
+   cache: 'no-store',
+   body: JSON.stringify({ senha: senha })
   });
 
-  if (res.ok) {
-   // Login bem-sucedido
-   sessionStorage.setItem('logado', '1');
+  updateDebugInfo(`Resposta API: ${response.status} ${response.statusText}`);
+  
+  if (response.ok) {
+   const data = await response.json();
+   updateDebugInfo(`Resposta JSON: ${JSON.stringify(data)}`);
    
-   document.getElementById('adminPanel').classList.remove('hidden');
-   document.getElementById('loginBtn').classList.add('hidden');
-   document.getElementById('logoutBtn').classList.remove('hidden');
-   
-   closeLoginModal();
-   alert('ACESSO ADMINISTRATIVO CONCEDIDO');
+   if (data.ok === true) {
+    updateDebugInfo('Login bem-sucedido via API');
+    sessionStorage.setItem('logado', '1');
+    
+    document.getElementById('adminPanel').classList.remove('hidden');
+    document.getElementById('loginBtn').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
+    
+    closeLoginModal();
+    alert('ACESSO ADMINISTRATIVO CONCEDIDO');
+   } else {
+    alert('SENHA INCORRETA (API)');
+    document.getElementById('senha').value = '';
+    document.getElementById('senha').focus();
+   }
   } else {
-   alert('SENHA INCORRETA');
-   document.getElementById('senha').value = '';
-   document.getElementById('senha').focus();
+   const errorText = await response.text();
+   updateDebugInfo(`Erro API: ${errorText}`);
+   alert(`ERRO NA API: ${response.status} ${response.statusText}`);
   }
- } catch (e) {
-  alert('ERRO AO CONECTAR NO SERVIDOR');
-  console.error('Erro de conexão:', e);
+  
+ } catch (error) {
+  updateDebugInfo(`Erro de conexão: ${error.message}`);
+  console.error('Erro completo:', error);
+  
+  // Fallback: usar senha local em caso de erro de conexão
+  alert(`ERRO DE CONEXÃO COM API: ${error.message}\n\nTente usar a senha temporária: ${SENHA_TEMPORARIA}`);
+  
  } finally {
   // Esconder loading
   spinner.classList.add('hidden');
   spinner.innerHTML = '';
   btnText.textContent = 'VERIFICAR CREDENCIAIS';
+  btnEntrar.disabled = false;
  }
 }
 
 function logout() {
  if (confirm('SAIR DO MODO ADMINISTRATIVO?')) {
+  updateDebugInfo('Logout realizado');
   sessionStorage.removeItem('logado');
   location.reload();
  }
@@ -461,17 +569,16 @@ function add() {
   patente: pat,
   funcao: document.getElementById('funcao').value.trim() || 'NÃO DEFINIDA',
   ordem: pObj.o,
-  classe: pObj.c, // Mantém a classe original da patente
+  classe: pObj.c,
   entrada: document.getElementById('entrada').value,
   situacao: document.getElementById('situacao').value,
   dataCadastro: new Date().toISOString(),
-  isEstagio: isEstagio // Flag para identificar estagiário
+  isEstagio: isEstagio
  };
  
  dados.push(novoIntegrante);
  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
  
- // Marcar para highlight
  ultimoIdAdicionado = novoId;
  
  limparForm();
@@ -482,10 +589,7 @@ function add() {
 }
 
 function moverParaEstagio() {
- // Encontrar o último integrante selecionado na tabela (se houver seleção)
- // Esta função poderia ser usada para mover um integrante existente para estágio
- // Por enquanto, vamos apenas mostrar uma mensagem
- alert('Para marcar como estagiário, use a caixa de seleção "MARCAR COMO ESTAGIÁRIO" no formulário.\n\nOu selecione um integrante na tabela para mover para estágio.');
+ alert('Para marcar como estagiário, use a caixa de seleção "MARCAR COMO ESTAGIÁRIO" no formulário.');
 }
 
 function remover(i) {
@@ -541,13 +645,10 @@ function exportarDados() {
 }
 
 function render() {
- // Ordenar por hierarquia
  dados.sort((a, b) => a.ordem - b.ordem);
  
- // Totais gerais
  document.getElementById('totalGeral').textContent = dados.length;
  
- // Contadores por categoria
  const contadores = {
   estagio: 0,
   superior: 0,
@@ -559,17 +660,14 @@ function render() {
  };
  
  dados.forEach(d => {
-  // Contar por categoria real da patente
   if (contadores[d.classe] !== undefined) {
    contadores[d.classe]++;
   }
-  // Contar estagiários separadamente
   if (d.isEstagio) {
    contadores.estagio++;
   }
  });
  
- // Atualizar totais dos cards
  document.getElementById('totalSuperiores').textContent = contadores.superior;
  document.getElementById('totalIntermediarios').textContent = contadores.intermediario;
  document.getElementById('totalSubalternos').textContent = contadores.subalterno;
@@ -578,7 +676,6 @@ function render() {
  document.getElementById('totalPracas').textContent = contadores.praca;
  document.getElementById('totalEstagios').textContent = contadores.estagio;
  
- // Atualizar estatísticas
  document.getElementById('stat-superior').textContent = contadores.superior;
  document.getElementById('stat-intermediario').textContent = contadores.intermediario;
  document.getElementById('stat-subalterno').textContent = contadores.subalterno;
@@ -587,7 +684,6 @@ function render() {
  document.getElementById('stat-praca').textContent = contadores.praca;
  document.getElementById('stat-estagio').textContent = contadores.estagio;
  
- // Limpar todas as tabelas
  const tabelasIds = [
   'lista-superiores',
   'lista-intermediarios', 
@@ -602,31 +698,24 @@ function render() {
   document.getElementById(id).innerHTML = '';
  });
  
- // Verificar se está logado (usando sessionStorage)
  const isLogado = sessionStorage.getItem('logado') === '1';
  
- // Preencher tabelas por categoria
  dados.forEach((d, i) => {
   const statusClass = d.situacao === 'ativo' ? 'status-ativo' : d.situacao === 'ausente' ? 'status-ausente' : 'status-inativo';
   
   const row = document.createElement('tr');
   row.setAttribute('data-id', d.id);
   
-  // Adicionar classe de highlight se for o último adicionado
   if (d.id === ultimoIdAdicionado) {
    row.classList.add('novo-registro');
   }
   
-  // Determinar a cor da badge (classe normal da patente)
   const badgeClass = d.classe;
   
-  // Determinar em qual tabela colocar
   let tabelaId;
   if (d.isEstagio) {
-   // Estagiários vão para a tabela especial
    tabelaId = 'lista-estagios';
   } else {
-   // Não estagiários vão para suas tabelas normais
    switch(d.classe) {
     case 'superior':
      tabelaId = 'lista-superiores';
@@ -670,7 +759,6 @@ function render() {
   document.getElementById(tabelaId).appendChild(row);
  });
  
- // Verificar login para mostrar/ocultar painel administrativo
  if (isLogado) {
   document.getElementById('adminPanel').classList.remove('hidden');
   document.getElementById('loginBtn').classList.add('hidden');
@@ -681,7 +769,6 @@ function render() {
   document.getElementById('logoutBtn').classList.add('hidden');
  }
  
- // Remover highlight após 2 segundos
  if (ultimoIdAdicionado) {
   setTimeout(() => {
    ultimoIdAdicionado = null;
