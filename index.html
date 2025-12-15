@@ -25,6 +25,8 @@ button{padding:10px 16px;border-radius:6px;border:none;font-weight:bold;cursor:p
 .btn-promover:hover{background:#d97706}
 .btn-rebaixar{background:#6b7280;color:#fff}
 .btn-rebaixar:hover{background:#4b5563}
+.btn-status{background:#3b82f6;color:#fff}
+.btn-status:hover{background:#1d4ed8}
 
 input,select{background:#0f0f0f;color:#fff;border:1px solid #444;padding:10px;border-radius:6px;width:100%;margin-bottom:10px;box-sizing:border-box}
 input:focus,select:focus{outline:none;border-color:#888}
@@ -119,7 +121,7 @@ tr:hover{background:#1a1a1a}
 </head>
 <body>
 <header>
-<h1>🔒 HIERARQUIA DE ROTA</h1>
+<h1> HIERARQUIA DE ROTA</h1>
 <button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
 <button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
@@ -380,7 +382,8 @@ const patentes = [
  
  // PRAÇAS - CINZA
  {n:'CABO PM ⟩⟩', o:11, c:'praca'},
- {n:'SOLDADO PM ⟩', o:12, c:'praca'}
+ {n:'SOLDADO DE 1ª CLASSE PM ⟩', o:12, c:'praca'},  // NOVO: SOLDADO DE 1ª CLASSE
+ {n:'SOLDADO DE 2ª CLASSE PM', o:13, c:'praca'}     // NOVO: SOLDADO DE 2ª CLASSE
 ];
 
 let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
@@ -556,6 +559,30 @@ function remover(i) {
   dados.splice(i, 1);
   localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
   render();
+ }
+}
+
+// NOVA FUNÇÃO: ALTERAR STATUS DO INTEGRANTE
+function alterarStatus(i) {
+ const integrante = dados[i];
+ 
+ // Alternar entre ATIVO e AUSENTE
+ if (integrante.situacao === 'ativo') {
+  integrante.situacao = 'ausente';
+  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+  render();
+  alert(`✅ ${integrante.nome} marcado como AUSENTE`);
+ } else if (integrante.situacao === 'ausente') {
+  integrante.situacao = 'ativo';
+  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+  render();
+  alert(`✅ ${integrante.nome} marcado como ATIVO`);
+ } else {
+  // Se estiver inativo, permite ativar
+  integrante.situacao = 'ativo';
+  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
+  render();
+  alert(`✅ ${integrante.nome} reativado e marcado como ATIVO`);
  }
 }
 
@@ -752,6 +779,10 @@ function render() {
   const podePromover = indexAtual > 0;
   const podeRebaixar = indexAtual < patentes.length - 1;
   
+  // Determinar texto e ícone do botão de status
+  const statusBtnText = d.situacao === 'ativo' ? '📅 AUSENTE' : d.situacao === 'ausente' ? '✅ ATIVAR' : '✅ ATIVAR';
+  const statusBtnTitle = d.situacao === 'ativo' ? 'Marcar como AUSENTE' : d.situacao === 'ausente' ? 'Marcar como ATIVO' : 'Reativar como ATIVO';
+  
   row.innerHTML = `
    <td style="font-weight:bold">${d.nome}</td>
    <td><span class="badge ${badgeClass}">${d.patente}</span></td>
@@ -765,6 +796,7 @@ function render() {
       `<button class="btn-danger" onclick="remover(${i})" title="Remover">🗑️</button>
        ${podePromover ? `<button class="btn-promover" onclick="promover(${i})" title="Promover">⬆️</button>` : ''}
        ${podeRebaixar ? `<button class="btn-rebaixar" onclick="rebaixar(${i})" title="Rebaixar">⬇️</button>` : ''}
+       <button class="btn-status" onclick="alterarStatus(${i})" title="${statusBtnTitle}">${statusBtnText}</button>
        ${!d.isEstagio ? `<button class="btn-purple" onclick="toggleEstagio(${i})" title="Mover para Estágios">🎓</button>` : `<button class="btn" onclick="toggleEstagio(${i})" title="Remover dos Estágios">📋</button>`}` 
       : '🔒'}
     </div>
