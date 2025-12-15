@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <title>HIERARQUIA DE ROTA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- Incluir Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
 <style>
 /* ================= VISUAL PRETO COM BACKGROUND ================= */
 body{
@@ -128,6 +131,21 @@ tr:hover{background:rgba(26,26,26,0.8)}
 .status-ausente{background:#facc15}
 .status-inativo{background:#ef4444}
 
+/* LOADING */
+.loading{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.8);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:10000;
+    font-size:20px;
+}
+
 /* CATEGORIAS COM CORES NAS LATERAIS */
 .categoria-header{
     background:rgba(17,17,17,0.9);
@@ -216,8 +234,16 @@ tr:hover{background:rgba(26,26,26,0.8)}
 </style>
 </head>
 <body>
+<!-- LOADING INICIAL -->
+<div id="loading" class="loading">
+    <div style="text-align:center">
+        <div style="font-size:40px;margin-bottom:20px">🔄</div>
+        <div>Conectando ao banco de dados...</div>
+    </div>
+</div>
+
 <header>
-<h1> HIERARQUIA DE ROTA </h1>
+<h1>🔒 HIERARQUIA DE ROTA ONLINE</h1>
 <button id="loginBtn" class="btn">🔑 Acesso Administrativo</button>
 <button id="logoutBtn" class="btn-danger hidden">🚪 Sair</button>
 </header>
@@ -454,6 +480,20 @@ tr:hover{background:rgba(26,26,26,0.8)}
 </main>
 
 <script>
+// ================= CONFIGURAÇÃO DO FIREBASE =================
+// SUBSITUA ESTAS CONFIGURAÇÕES PELAS SUAS DO FIREBASE
+const firebaseConfig = {
+  apiKey: "AIzaSyBCZe9z2JDmlV1FG8xGwfFoDA_c8E57618",
+  authDomain: "hierarquia-rota.firebaseapp.com",
+  projectId: "hierarquia-rota",
+  storageBucket: "hierarquia-rota.firebasestorage.app",
+  messagingSenderId: "568236636358",
+  appId: "1:568236636358:web:5faa2f825d97636d3cbfc7",
+};
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 // PATENTES COM SÍMBOLOS - ORDENADAS POR HIERARQUIA
 const patentes = [
  // OFICIAIS SUPERIORES - BRANCO
@@ -478,12 +518,55 @@ const patentes = [
  
  // PRAÇAS - CINZA
  {n:'CABO PM ⟩⟩', o:11, c:'praca'},
- {n:'SOLDADO DE 1ª CLASSE PM ⟩', o:12, c:'praca'},  // NOVO: SOLDADO DE 1ª CLASSE
- {n:'SOLDADO DE 2ª CLASSE PM', o:13, c:'praca'}     // NOVO: SOLDADO DE 2ª CLASSE
+ {n:'SOLDADO DE 1ª CLASSE PM ⟩', o:12, c:'praca'},
+ {n:'SOLDADO DE 2ª CLASSE PM', o:13, c:'praca'}
 ];
 
-let dados = JSON.parse(localStorage.getItem('hierarquia_rota')) || [];
+let dados = [];
 let ultimoIdAdicionado = null;
+
+// ================= FUNÇÕES DO FIREBASE =================
+
+// Carregar dados do Firebase
+function carregarDados() {
+    document.getElementById('loading').style.display = 'flex';
+    
+    database.ref('integrantes').on('value', (snapshot) => {
+        dados = [];
+        const dadosFirebase = snapshot.val();
+        
+        if (dadosFirebase) {
+            Object.keys(dadosFirebase).forEach(key => {
+                dados.push(dadosFirebase[key]);
+            });
+        }
+        
+        render();
+        document.getElementById('loading').style.display = 'none';
+    }, (error) => {
+        console.error("Erro ao carregar dados:", error);
+        alert('Erro ao carregar dados do servidor');
+        document.getElementById('loading').style.display = 'none';
+    });
+}
+
+// Adicionar integrante no Firebase
+function adicionarNoFirebase(integrante) {
+    const novoId = Date.now().toString();
+    integrante.id = novoId;
+    
+    return database.ref('integrantes/' + novoId).set(integrante);
+}
+
+// Atualizar integrante no Firebase
+function atualizarNoFirebase(integrante) {
+    return database.ref('integrantes/' + integrante.id).update(integrante);
+}
+
+// Remover integrante do Firebase
+function removerDoFirebase(id) {
+    return database.ref('integrantes/' + id).remove();
+}
 
 function init(){
  const sel = document.getElementById('patente');
@@ -521,7 +604,8 @@ function init(){
  // Verificar se já está logado
  checkLoginStatus();
  
- render();
+ // Carregar dados do Firebase
+ carregarDados();
 }
 
 function checkLoginStatus() {
@@ -604,7 +688,7 @@ function limparForm() {
  document.getElementById('nome').focus();
 }
 
-function add() {
+async function add() {
  const cpf = document.getElementById('cpf').value.trim();
  const nome = document.getElementById('nome').value.trim();
  const pat = document.getElementById('patente').value;
@@ -621,112 +705,126 @@ function add() {
   return;
  }
  
- const novoId = Date.now();
  const novoIntegrante = {
-  id: novoId,
+  id: Date.now().toString(),
   cpf: cpf || 'NÃO INFORMADO',
   nome: nome,
   patente: pat,
   funcao: document.getElementById('funcao').value.trim() || 'NÃO DEFINIDA',
   ordem: pObj.o,
-  classe: pObj.c, // Mantém a classe original da patente
+  classe: pObj.c,
   entrada: document.getElementById('entrada').value,
   promocao: document.getElementById('promocao').value || new Date().toISOString().split('T')[0],
   situacao: document.getElementById('situacao').value,
   dataCadastro: new Date().toISOString(),
-  isEstagio: isEstagio // Flag para identificar estagiário
+  isEstagio: isEstagio
  };
  
- dados.push(novoIntegrante);
- localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
- 
- // Marcar para highlight
- ultimoIdAdicionado = novoId;
- 
- limparForm();
- render();
- 
- const categoria = isEstagio ? 'ESTÁGIOS' : 'REGULAR';
- alert(`✅ ${nome.toUpperCase()} CADASTRADO COMO ${pat} - ${categoria}`);
-}
-
-function remover(i) {
- if (confirm('REMOVER ESTE INTEGRANTE?')) {
-  dados.splice(i, 1);
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
+ try {
+    await adicionarNoFirebase(novoIntegrante);
+    ultimoIdAdicionado = novoIntegrante.id;
+    limparForm();
+    
+    const categoria = isEstagio ? 'ESTÁGIOS' : 'REGULAR';
+    alert(`✅ ${nome.toUpperCase()} CADASTRADO COMO ${pat} - ${categoria}`);
+ } catch (error) {
+    alert('❌ ERRO AO SALVAR NO BANCO DE DADOS');
+    console.error(error);
  }
 }
 
-// NOVA FUNÇÃO: ALTERAR STATUS DO INTEGRANTE
-function alterarStatus(i) {
+async function remover(i) {
+ if (confirm('REMOVER ESTE INTEGRANTE?')) {
+  const integrante = dados[i];
+  try {
+    await removerDoFirebase(integrante.id);
+    alert('✅ Integrante removido com sucesso!');
+  } catch (error) {
+    alert('❌ ERRO AO REMOVER DO BANCO DE DADOS');
+    console.error(error);
+  }
+ }
+}
+
+// ALTERAR STATUS DO INTEGRANTE
+async function alterarStatus(i) {
  const integrante = dados[i];
  
- // Alternar entre ATIVO e AUSENTE
  if (integrante.situacao === 'ativo') {
   integrante.situacao = 'ausente';
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
-  alert(`✅ ${integrante.nome} marcado como AUSENTE`);
  } else if (integrante.situacao === 'ausente') {
   integrante.situacao = 'ativo';
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
-  alert(`✅ ${integrante.nome} marcado como ATIVO`);
  } else {
-  // Se estiver inativo, permite ativar
   integrante.situacao = 'ativo';
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
-  alert(`✅ ${integrante.nome} reativado e marcado como ATIVO`);
+ }
+ 
+ try {
+    await atualizarNoFirebase(integrante);
+    const status = integrante.situacao === 'ativo' ? 'ATIVO' : 'AUSENTE';
+    alert(`✅ ${integrante.nome} marcado como ${status}`);
+ } catch (error) {
+    alert('❌ ERRO AO ATUALIZAR STATUS');
+    console.error(error);
  }
 }
 
-function toggleEstagio(i) {
+async function toggleEstagio(i) {
  const integrante = dados[i];
  integrante.isEstagio = !integrante.isEstagio;
- localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
- render();
  
- const acao = integrante.isEstagio ? 'marcado como ESTAGIÁRIO' : 'removido dos ESTÁGIOS';
- alert(`${integrante.nome} ${acao}`);
+ try {
+    await atualizarNoFirebase(integrante);
+    const acao = integrante.isEstagio ? 'marcado como ESTAGIÁRIO' : 'removido dos ESTÁGIOS';
+    alert(`${integrante.nome} ${acao}`);
+ } catch (error) {
+    alert('❌ ERRO AO ALTERAR ESTÁGIO');
+    console.error(error);
+ }
 }
 
 // PROMOVER um integrante
-function promover(i) {
+async function promover(i) {
  const integrante = dados[i];
  const indexAtual = patentes.findIndex(p => p.n === integrante.patente);
  
- if (indexAtual > 0) { // Não pode promover além do topo
+ if (indexAtual > 0) {
   const novaPatente = patentes[indexAtual - 1];
   integrante.patente = novaPatente.n;
   integrante.ordem = novaPatente.o;
   integrante.classe = novaPatente.c;
   integrante.promocao = new Date().toISOString().split('T')[0];
   
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
-  alert(`✅ ${integrante.nome} PROMOVIDO para ${novaPatente.n}`);
+  try {
+    await atualizarNoFirebase(integrante);
+    alert(`✅ ${integrante.nome} PROMOVIDO para ${novaPatente.n}`);
+  } catch (error) {
+    alert('❌ ERRO AO PROMOVER');
+    console.error(error);
+  }
  } else {
   alert('⚠️ Este já é o mais alto posto!');
  }
 }
 
 // REBAIXAR um integrante
-function rebaixar(i) {
+async function rebaixar(i) {
  const integrante = dados[i];
  const indexAtual = patentes.findIndex(p => p.n === integrante.patente);
  
- if (indexAtual < patentes.length - 1) { // Não pode rebaixar além do último
+ if (indexAtual < patentes.length - 1) {
   const novaPatente = patentes[indexAtual + 1];
   integrante.patente = novaPatente.n;
   integrante.ordem = novaPatente.o;
   integrante.classe = novaPatente.c;
   integrante.promocao = new Date().toISOString().split('T')[0];
   
-  localStorage.setItem('hierarquia_rota', JSON.stringify(dados));
-  render();
-  alert(`⚠️ ${integrante.nome} REBAIXADO para ${novaPatente.n}`);
+  try {
+    await atualizarNoFirebase(integrante);
+    alert(`⚠️ ${integrante.nome} REBAIXADO para ${novaPatente.n}`);
+  } catch (error) {
+    alert('❌ ERRO AO REBAIXAR');
+    console.error(error);
+  }
  } else {
   alert('⚠️ Este já é o posto mais baixo!');
  }
@@ -739,7 +837,7 @@ function exportarDados() {
  }
  
  const dadosExportar = {
-  sistema: 'HIERARQUIA DE ROTA',
+  sistema: 'HIERARQUIA DE ROTA ONLINE',
   data: new Date().toISOString(),
   total: dados.length,
   integrantes: dados.map(d => ({
@@ -757,7 +855,7 @@ function exportarDados() {
  
  const dataStr = JSON.stringify(dadosExportar, null, 2);
  const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
- const fileName = `hierarquia-rota-${new Date().toISOString().split('T')[0]}.json`;
+ const fileName = `hierarquia-rota-online-${new Date().toISOString().split('T')[0]}.json`;
  
  const link = document.createElement('a');
  link.setAttribute('href', dataUri);
@@ -786,11 +884,9 @@ function render() {
  };
  
  dados.forEach(d => {
-  // Contar por categoria real da patente
   if (contadores[d.classe] !== undefined) {
    contadores[d.classe]++;
   }
-  // Contar estagiários separadamente
   if (d.isEstagio) {
    contadores.estagio++;
   }
@@ -830,22 +926,16 @@ function render() {
   const row = document.createElement('tr');
   row.setAttribute('data-id', d.id);
   
-  // Adicionar classe de highlight se for o último adicionado
   if (d.id === ultimoIdAdicionado) {
    row.classList.add('novo-registro');
   }
   
-  // Determinar a cor da badge
-  // Estagiários usam badge ROXO, outros mantêm a cor normal
   const badgeClass = d.isEstagio ? 'estagio' : d.classe;
   
-  // Determinar em qual tabela colocar
   let tabelaId;
   if (d.isEstagio) {
-   // Estagiários vão para a tabela especial
    tabelaId = 'lista-estagios';
   } else {
-   // Não estagiários vão para suas tabelas normais
    switch(d.classe) {
     case 'superior':
      tabelaId = 'lista-superiores';
@@ -870,12 +960,10 @@ function render() {
    }
   }
   
-  // Verificar se pode promover/rebaixar
   const indexAtual = patentes.findIndex(p => p.n === d.patente);
   const podePromover = indexAtual > 0;
   const podeRebaixar = indexAtual < patentes.length - 1;
   
-  // Determinar texto e ícone do botão de status
   const statusBtnText = d.situacao === 'ativo' ? '📅 AUSENTE' : d.situacao === 'ausente' ? '✅ ATIVAR' : '✅ ATIVAR';
   const statusBtnTitle = d.situacao === 'ativo' ? 'Marcar como AUSENTE' : d.situacao === 'ausente' ? 'Marcar como ATIVO' : 'Reativar como ATIVO';
   
@@ -902,7 +990,7 @@ function render() {
   document.getElementById(tabelaId).appendChild(row);
  });
  
- // Verificar login para mostrar/ocultar painel administrativo
+ // Verificar login
  if (isLogado) {
   document.getElementById('adminPanel').classList.remove('hidden');
   document.getElementById('loginBtn').classList.add('hidden');
@@ -913,7 +1001,7 @@ function render() {
   document.getElementById('logoutBtn').classList.add('hidden');
  }
  
- // Remover highlight após 2 segundos
+ // Remover highlight
  if (ultimoIdAdicionado) {
   setTimeout(() => {
    ultimoIdAdicionado = null;
@@ -923,8 +1011,8 @@ function render() {
  }
 }
 
-// Inicializar
-init();
+// Inicializar quando a página carregar
+window.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
