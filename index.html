@@ -39,7 +39,7 @@ tr:hover{background:#1a1a1a}
 .superior{background:#ffffff;color:#000000 !important;border:1px solid #aaa} /* BRANCO */
 .intermediario{background:#22c55e;color:#000000 !important;border:1px solid #166534} /* VERDE */
 .subalterno{background:#facc15;color:#000000 !important;border:1px solid #a16207} /* AMARELO */
-.especial{background:#3b82f6;color:#ffffff !important;border:1px solid #1e40af} /* AZUL */
+.especial{background:#3b82f6;color:#ffffff !important;border:1px solid #1e40af} /* AZUL (MANTIDO) */
 .graduado{background:#ef4444;color:#ffffff !important;border:1px solid #991b1b} /* VERMELHO */
 .praca{background:#9ca3af;color:#000000 !important;border:1px solid #6b7280} /* CINZA */
 .estagio{background:#a855f7;color:#ffffff !important;border:1px solid #7c3aed} /* ROXO - ESTÁGIOS */
@@ -56,19 +56,45 @@ tr:hover{background:#1a1a1a}
 .status-ausente{background:#facc15}
 .status-inativo{background:#ef4444}
 
-/* CATEGORIAS */
+/* CATEGORIAS COM CORES NAS LATERAIS */
 .categoria-header{background:#111;color:#fff;padding:10px 15px;margin-top:20px;border-left:4px solid #fff;font-weight:bold;font-size:1.2em}
 .categoria-container{margin-bottom:30px}
+
+/* CORES DAS BORDAS LATERAIS PARA CADA CATEGORIA */
+.categoria-superior .categoria-header{border-left-color:#ffffff !important} /* BRANCO */
+.categoria-intermediario .categoria-header{border-left-color:#22c55e !important} /* VERDE */
+.categoria-subalterno .categoria-header{border-left-color:#facc15 !important} /* AMARELO */
+.categoria-especial .categoria-header{border-left-color:#3b82f6 !important} /* AZUL */
+.categoria-graduado .categoria-header{border-left-color:#ef4444 !important} /* VERMELHO */
+.categoria-praca .categoria-header{border-left-color:#9ca3af !important} /* CINZA */
+.categoria-estagio .categoria-header{border-left-color:#a855f7 !important} /* ROXO */
 
 /* FORM GRID */
 .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:15px;margin-bottom:20px}
 
 /* TOTALS */
 .totals-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-top:20px}
-.total-card{background:#111;padding:15px;border-radius:8px;text-align:center}
+.total-card{background:#111;padding:15px;border-radius:8px;text-align:center;border:2px solid transparent;transition:border-color 0.3s}
 .total-card h3{margin:0 0 10px 0;color:#aaa;font-size:14px}
 .total-card .numero{font-size:32px;font-weight:bold;color:#fff}
-.total-card.estagio .numero{color:#a855f7} /* ROXO PARA ESTÁGIOS */
+
+/* CORES DAS BORDAS PARA CADA CATEGORIA NO RESUMO GERAL */
+.total-card.superior{border-color:#ffffff} /* BRANCO */
+.total-card.intermediario{border-color:#22c55e} /* VERDE */
+.total-card.subalterno{border-color:#facc15} /* AMARELO */
+.total-card.especial{border-color:#3b82f6} /* AZUL */
+.total-card.graduado{border-color:#ef4444} /* VERMELHO */
+.total-card.praca{border-color:#9ca3af} /* CINZA */
+.total-card.estagio{border-color:#a855f7} /* ROXO */
+
+/* CORES DOS NÚMEROS PARA CADA CATEGORIA */
+.total-card.superior .numero{color:#ffffff} /* BRANCO */
+.total-card.intermediario .numero{color:#22c55e} /* VERDE */
+.total-card.subalterno .numero{color:#facc15} /* AMARELO */
+.total-card.especial .numero{color:#3b82f6} /* AZUL */
+.total-card.graduado .numero{color:#ef4444} /* VERMELHO */
+.total-card.praca .numero{color:#9ca3af} /* CINZA */
+.total-card.estagio .numero{color:#a855f7} /* ROXO */
 
 /* LOGIN MODAL */
 .modal{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background-color:rgba(0,0,0,0.8)}
@@ -89,8 +115,6 @@ tr:hover{background:#1a1a1a}
 .acoes-container{display:flex;gap:5px;flex-wrap:wrap}
 .acoes-container button{padding:6px 10px;font-size:12px}
 
-/* CONTADOR DE ESTÁGIOS */
-.contador-estagio{display:inline-block;background:#a855f7;color:white;padding:3px 8px;border-radius:12px;font-size:12px;margin-left:5px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -109,32 +133,32 @@ tr:hover{background:#1a1a1a}
 <h3>Total Geral</h3>
 <div class="numero" id="totalGeral">0</div>
 </div>
-<div class="total-card">
+<div class="total-card superior">
 <h3>Oficiais Superiores</h3>
 <div class="numero" id="totalSuperiores">0</div>
 </div>
-<div class="total-card">
+<div class="total-card intermediario">
 <h3>Oficiais Intermediários</h3>
 <div class="numero" id="totalIntermediarios">0</div>
 </div>
-<div class="total-card">
+<div class="total-card subalterno">
 <h3>Oficiais Subalternos</h3>
 <div class="numero" id="totalSubalternos">0</div>
 </div>
-<div class="total-card">
+<div class="total-card especial">
 <h3>Praças Especiais</h3>
 <div class="numero" id="totalEspeciais">0</div>
 </div>
-<div class="total-card">
+<div class="total-card graduado">
 <h3>Praças Graduadas</h3>
 <div class="numero" id="totalGraduadas">0</div>
 </div>
-<div class="total-card">
+<div class="total-card praca">
 <h3>Praças</h3>
 <div class="numero" id="totalPracas">0</div>
 </div>
 <div class="total-card estagio">
-<h3>Estagiários <span class="contador-estagio" id="contadorEstagio">0</span></h3>
+<h3>Estagiários</h3>
 <div class="numero" id="totalEstagios">0</div>
 </div>
 </div>
@@ -183,7 +207,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: OFICIAIS SUPERIORES -->
-<div class="categoria-container">
+<div class="categoria-container categoria-superior">
 <div class="categoria-header">OFICIAIS SUPERIORES</div>
 <div class="card">
 <table>
@@ -204,7 +228,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: OFICIAIS INTERMEDIÁRIOS -->
-<div class="categoria-container">
+<div class="categoria-container categoria-intermediario">
 <div class="categoria-header">OFICIAIS INTERMEDIÁRIOS</div>
 <div class="card">
 <table>
@@ -225,7 +249,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: OFICIAIS SUBALTERNOS -->
-<div class="categoria-container">
+<div class="categoria-container categoria-subalterno">
 <div class="categoria-header">OFICIAIS SUBALTERNOS</div>
 <div class="card">
 <table>
@@ -246,7 +270,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: PRAÇAS ESPECIAIS -->
-<div class="categoria-container">
+<div class="categoria-container categoria-especial">
 <div class="categoria-header">PRAÇAS ESPECIAIS</div>
 <div class="card">
 <table>
@@ -267,7 +291,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: PRAÇAS GRADUADAS -->
-<div class="categoria-container">
+<div class="categoria-container categoria-graduado">
 <div class="categoria-header">PRAÇAS GRADUADAS</div>
 <div class="card">
 <table>
@@ -288,7 +312,7 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: PRAÇAS -->
-<div class="categoria-container">
+<div class="categoria-container categoria-praca">
 <div class="categoria-header">PRAÇAS</div>
 <div class="card">
 <table>
@@ -309,8 +333,8 @@ tr:hover{background:#1a1a1a}
 </div>
 
 <!-- CATEGORIA: ESTÁGIOS -->
-<div class="categoria-container">
-<div class="categoria-header" style="border-left-color:#a855f7">🎓 ESTÁGIOS</div>
+<div class="categoria-container categoria-estagio">
+<div class="categoria-header">🎓 ESTÁGIOS</div>
 <div class="card">
 <table>
 <thead>
@@ -381,7 +405,6 @@ function init(){
  document.getElementById('loginBtn').onclick = openLoginModal;
  document.getElementById('logoutBtn').onclick = logout;
  document.getElementById('btnEntrar').onclick = login;
- document.getElementById('btnMoverEstagio').onclick = moverParaEstagio;
  document.querySelector('.close').onclick = closeLoginModal;
  
  // Fechar modal ao clicar fora
@@ -528,10 +551,6 @@ function add() {
  alert(`✅ ${nome.toUpperCase()} CADASTRADO COMO ${pat} - ${categoria}`);
 }
 
-function moverParaEstagio() {
- alert('Para marcar como estagiário, use a caixa de seleção "MARCAR COMO ESTAGIÁRIO" no formulário.');
-}
-
 function remover(i) {
  if (confirm('REMOVER ESTE INTEGRANTE?')) {
   dados.splice(i, 1);
@@ -662,7 +681,6 @@ function render() {
  document.getElementById('totalGraduadas').textContent = contadores.graduado;
  document.getElementById('totalPracas').textContent = contadores.praca;
  document.getElementById('totalEstagios').textContent = contadores.estagio;
- document.getElementById('contadorEstagio').textContent = contadores.estagio;
  
  // Limpar todas as tabelas
  const tabelasIds = [
